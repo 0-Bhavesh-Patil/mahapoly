@@ -4,19 +4,17 @@ import { useMemo, useState, useEffect } from "react";
 import {
   Search,
   Building2,
-  ChevronDown,
-  ChevronUp,
   GraduationCap,
-  SlidersHorizontal,
   Star,
   X,
-  ArrowRight,
   Share2,
   Printer,
-  Check,
-  Info,
-  MapPin,
-  Award
+  Terminal,
+  Activity,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Cpu
 } from "lucide-react";
 import raw from "../data.json";
 import {
@@ -31,7 +29,7 @@ import {
   type Level,
 } from "../lib/seatTypes";
 
-// ---------- Data Layer (PRESERVED EXACTLY) ----------
+// ---------- CORE DATA LAYER ----------
 type RawCutoff = [number, number, number, number];
 type RawCourse = [number, RawCutoff[]];
 type RawCollege = { code: string; name: string; status: string; courses: RawCourse[] };
@@ -56,78 +54,54 @@ const FLAT: FlatRow[] = (() => {
 const BRANCH_LIST = DATA.branches.map((name, idx) => ({ idx, name })).sort((a, b) => a.name.localeCompare(b.name));
 const SEAT_INDEX = new Map<string, number>(DATA.seatTypes.map((s, i) => [s, i]));
 
+// ---------- BOOT SEQUENCE ----------
 
-// ---------- UI Atoms (Clean, Accessible, Native-App Feel) ----------
-
-function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode; }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-        active
-          ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
-          : "bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-indigo-50"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const isGovt = status.startsWith("Government") && !status.includes("Aided");
-  return (
-    <span
-      className={`px-2.5 py-1 text-[11px] font-bold tracking-wide rounded-lg border ${
-        isGovt 
-          ? "bg-emerald-50 border-emerald-200 text-emerald-700" 
-          : "bg-slate-50 border-slate-200 text-slate-600"
-      }`}
-    >
-      {status}
-    </span>
-  );
-}
-
-function MarginBar({ merit, cutoff }: { merit: number; cutoff: number }) {
-  const margin = merit - cutoff;
-  const safe = margin >= 5;
-  const tight = margin >= 0 && margin < 5;
-  const color = safe ? "#10b981" : tight ? "#f59e0b" : "#94a3b8"; 
-  const pct = Math.max(4, Math.min(100, (cutoff / 100) * 100));
+function BootSequence({ onComplete }: { onComplete: () => void }) {
+  const [step, setStep] = useState(0);
   
+  useEffect(() => {
+    const sequence = [
+      setTimeout(() => setStep(1), 500),
+      setTimeout(() => setStep(2), 1200),
+      setTimeout(() => setStep(3), 1800),
+      setTimeout(() => onComplete(), 2500)
+    ];
+    return () => sequence.forEach(clearTimeout);
+  }, [onComplete]);
+
   return (
-    <div className="flex flex-col gap-1.5 min-w-[120px] text-right">
-      <div className="flex items-center justify-end gap-2">
-         <span className="text-xs font-bold tabular-nums" style={{ color: margin >= 0 ? color : '#64748b' }}>
-          {margin >= 0 ? '+' : ''}{margin.toFixed(2)}% margin
-        </span>
-      </div>
-      <div className="relative w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
-        <div className="absolute inset-y-0 right-0 rounded-full transition-all duration-700 ease-out" style={{ width: `${pct}%`, backgroundColor: color }} />
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#030303] text-[#00FF66] font-mono p-6">
+      <div className="w-full max-w-2xl space-y-4">
+        <div className="flex items-center gap-3 text-sm opacity-50 mb-8 animate-pulse">
+          <Terminal size={16} /> SYSTEM BOOT
+        </div>
+        <div className="text-2xl md:text-4xl font-black tracking-tighter">
+          {step >= 0 && <p className="animate-in fade-in slide-in-from-bottom-4 duration-300">&gt; INITIALIZING MAHA_POLY ENGINE...</p>}
+          {step >= 1 && <p className="animate-in fade-in slide-in-from-bottom-4 duration-300 text-white mt-2">&gt; PARSING {DATA.colleges.length} INSTITUTES...</p>}
+          {step >= 2 && <p className="animate-in fade-in slide-in-from-bottom-4 duration-300 text-[#00FF66] mt-2">&gt; SYNCING REAL-TIME CUTOFFS... [OK]</p>}
+        </div>
+        {step >= 2 && (
+          <div className="w-full h-1 bg-[#111] mt-8 overflow-hidden rounded-full">
+            <div className="h-full bg-[#00FF66] w-full animate-[progress_0.7s_ease-in-out]" style={{ animationFillMode: 'forwards' }} />
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function SkeletonCard() {
+function ScanningLoader() {
   return (
-    <div className="flex flex-col md:flex-row md:items-center gap-4 bg-white border border-slate-100 rounded-2xl p-5 shadow-sm animate-pulse">
-      <div className="flex-1 space-y-3">
-        <div className="flex gap-2"><div className="h-5 w-24 bg-slate-100 rounded-md" /><div className="h-5 w-16 bg-slate-100 rounded-md" /></div>
-        <div className="h-6 w-3/4 bg-slate-100 rounded-lg" />
-        <div className="h-4 w-1/2 bg-slate-100 rounded-md" />
-      </div>
-      <div className="flex items-center gap-6 mt-4 md:mt-0">
-        <div className="space-y-2 text-right"><div className="h-4 w-16 bg-slate-100 rounded-md ml-auto" /><div className="h-2 w-24 bg-slate-100 rounded-full" /></div>
-        <div className="h-10 w-10 bg-slate-100 rounded-xl" />
+    <div className="relative w-full h-32 bg-[#0A0A0A] border border-[#222] rounded-2xl overflow-hidden flex items-center justify-center">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00FF66]/10 to-transparent h-[200%] animate-pulse" />
+      <div className="flex items-center gap-3 text-[#00FF66] font-mono text-sm uppercase tracking-widest z-10">
+        <Activity size={16} className="animate-spin" /> Processing Matrices
       </div>
     </div>
   );
 }
 
-
-// ---------- Match Mode ----------
+// ---------- MATCH ENGINE ----------
 
 function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; toggleShortlist: (key: string) => void; }) {
   const [merit, setMerit] = useState<string>("");
@@ -136,22 +110,19 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
   const [gender, setGender] = useState<Gender>("G");
   const [level, setLevel] = useState<Level>("H");
   const [round, setRound] = useState(1);
-  const [branchFilter, setBranchFilter] = useState<Set<number>>(new Set());
   const [branchQuery, setBranchQuery] = useState("");
-  const [visibleCount, setVisibleCount] = useState(50);
-  
-  // Loading State for smooth UX
+  const [branchFilter, setBranchFilter] = useState<Set<number>>(new Set());
   const [isCalculating, setIsCalculating] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(20);
 
   const isSpecialCategory = ["EWS", "TFWS", "DEFOPENS", "ORPHAN", "PWDOPENH"].includes(category);
   const meritNum = parseFloat(merit);
   const hasValidMerit = merit.trim() !== "" && !isNaN(meritNum) && meritNum >= 0 && meritNum <= 100;
 
-  // Artificial debounce to show skeleton loaders (makes the tool feel like it's doing heavy lifting)
   useEffect(() => {
     if (hasValidMerit) {
       setIsCalculating(true);
-      const timer = setTimeout(() => setIsCalculating(false), 600);
+      const timer = setTimeout(() => setIsCalculating(false), 800);
       return () => clearTimeout(timer);
     }
   }, [merit, category, candidature, gender, level, round, branchFilter, hasValidMerit]);
@@ -166,7 +137,7 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
     for (const row of FLAT) {
       if (row.round !== round) continue;
       if (!seatIdxs.has(row.seat)) continue;
-      if (row.merit > meritNum) continue; 
+      if (row.merit > meritNum) continue;
       if (branchFilter.size > 0 && !branchFilter.has(row.branch)) continue;
       const key = `${row.ci}-${row.branch}`;
       const existing = best.get(key);
@@ -175,222 +146,138 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
     return Array.from(best.values()).sort((a, b) => b.merit - a.merit);
   }, [hasValidMerit, meritNum, category, candidature, gender, level, round, branchFilter]);
 
-  useEffect(() => setVisibleCount(50), [results]);
-
-  const filteredBranchList = branchQuery
-    ? BRANCH_LIST.filter((b) => b.name.toLowerCase().includes(branchQuery.toLowerCase()))
-    : BRANCH_LIST;
+  const filteredBranchList = branchQuery ? BRANCH_LIST.filter((b) => b.name.toLowerCase().includes(branchQuery.toLowerCase())) : BRANCH_LIST;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 relative z-10 animate-in fade-in duration-700">
       
-      {/* Parameter Form - Clean, card-based layout */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 space-y-8 relative overflow-hidden">
+      {/* BENTO BOX CONTROLS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-1">
-            <label className="block text-sm font-bold text-slate-700 mb-2">Merit Percentage</label>
-            <div className="relative">
-              <input
-                type="number"
-                inputMode="decimal"
-                min={0} max={100} step={0.01}
-                placeholder="e.g. 82.40"
-                value={merit}
-                onChange={(e) => setMerit(e.target.value)}
-                className="w-full md:w-72 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-2xl font-bold tabular-nums text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all"
-              />
-              <Award className="absolute right-5 top-5 text-slate-400 h-6 w-6" />
-            </div>
-          </div>
-
-          <div className="flex-1 md:max-w-xs">
-            <label className="block text-sm font-bold text-slate-700 mb-2">Category</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-5 py-5 bg-slate-50 border border-slate-200 rounded-2xl text-base font-semibold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all appearance-none cursor-pointer"
-            >
-              {CATEGORY_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+        <div className="md:col-span-2 bg-[#080808] border border-[#1F1F1F] rounded-3xl p-6 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:bg-[#00FF66]/10 transition-colors duration-700" />
+          <label className="block text-[10px] font-mono text-[#888] mb-4 uppercase tracking-[0.2em]">01 // Target Merit</label>
+          <div className="flex items-end gap-4 relative z-10">
+            <input
+              type="number" step="0.01" placeholder="00.00"
+              value={merit} onChange={(e) => setMerit(e.target.value)}
+              className="bg-transparent text-6xl md:text-8xl font-black tabular-nums text-white placeholder:text-[#222] focus:outline-none w-full tracking-tighter"
+            />
+            <span className="text-2xl text-[#444] mb-4 md:mb-6 font-black">%</span>
           </div>
         </div>
 
-        {!isSpecialCategory && (
-          <div className="flex flex-wrap gap-8 pt-6 border-t border-slate-100">
-            <div>
-              <div className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Candidature</div>
-              <div className="flex flex-wrap gap-2">
-                {CANDIDATURE_OPTIONS.map((o) => (
-                  <Pill key={o.value} active={candidature === o.value} onClick={() => setCandidature(o.value)}>{o.label}</Pill>
-                ))}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Gender</div>
-              <div className="flex gap-2">
-                {GENDER_OPTIONS.map((o) => (
-                  <Pill key={o.value} active={gender === o.value} onClick={() => setGender(o.value)}>{o.label}</Pill>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex flex-wrap gap-8 pt-6 border-t border-slate-100">
-          {!isSpecialCategory && (
-            <div>
-              <div className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Seat Level</div>
-              <div className="flex gap-2">
-                {LEVEL_OPTIONS.map((o) => (
-                  <Pill key={o.value} active={level === o.value} onClick={() => setLevel(o.value)}>{o.label}</Pill>
-                ))}
-              </div>
-            </div>
-          )}
-          
+        <div className="bg-[#080808] border border-[#1F1F1F] rounded-3xl p-6 flex flex-col gap-6">
           <div>
-            <div className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">CAP Round Filter</div>
-            <div className="flex gap-2">
+            <label className="block text-[10px] font-mono text-[#888] mb-3 uppercase tracking-[0.2em]">02 // Class</label>
+            <select
+              value={category} onChange={(e) => setCategory(e.target.value)}
+              className="w-full bg-[#111] border border-[#222] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00FF66] transition-colors appearance-none font-medium"
+            >
+              {CATEGORY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[10px] font-mono text-[#888] mb-3 uppercase tracking-[0.2em]">03 // CAP Stage</label>
+            <div className="grid grid-cols-4 gap-2">
               {[1, 2, 3, 4].map((r) => (
                 <button
-                  key={r}
-                  onClick={() => setRound(r)}
-                  className={`w-12 h-12 rounded-xl text-sm font-bold transition-all ${
-                    round === r
-                      ? "bg-slate-900 text-white shadow-md"
-                      : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                  }`}
+                  key={r} onClick={() => setRound(r)}
+                  className={`py-3 rounded-xl font-bold transition-all ${round === r ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]" : "bg-[#111] text-[#666] hover:bg-[#222]"}`}
                 >
-                  R{r}
+                  {r}
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Branch Filter */}
-        <details className="group pt-2">
-          <summary className="flex items-center gap-2 text-sm font-bold text-slate-600 cursor-pointer hover:text-indigo-600 list-none transition-colors">
-            <SlidersHorizontal className="h-4 w-4" />
-            Specific Branch Filter
-            {branchFilter.size > 0 && (
-              <span className="px-2.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 text-xs font-bold ml-2">
-                {branchFilter.size} Selected
-              </span>
-            )}
-            <ChevronDown className="h-4 w-4 ml-auto group-open:hidden" />
-            <ChevronUp className="h-4 w-4 ml-auto hidden group-open:block" />
-          </summary>
-          <div className="mt-4 p-5 bg-slate-50 border border-slate-100 rounded-2xl space-y-4">
-            <input
-              type="text"
-              placeholder="Search specific branches (e.g. Computer Engineering)..."
-              value={branchQuery}
-              onChange={(e) => setBranchQuery(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-slate-800 placeholder:text-slate-400"
-            />
-            <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-              {filteredBranchList.map((b) => {
-                const active = branchFilter.has(b.idx);
-                return (
-                  <button
-                    key={b.idx}
-                    onClick={() => {
-                      const next = new Set(branchFilter);
-                      active ? next.delete(b.idx) : next.add(b.idx);
-                      setBranchFilter(next);
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                      active
-                        ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
-                        : "bg-white border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-indigo-50"
-                    }`}
-                  >
-                    {b.name}
-                  </button>
-                );
-              })}
-            </div>
-            {branchFilter.size > 0 && (
-              <button onClick={() => setBranchFilter(new Set())} className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 pt-2">
-                <X className="h-3 w-3" /> Clear selections
-              </button>
-            )}
+        {!isSpecialCategory && (
+          <div className="md:col-span-3 bg-[#080808] border border-[#1F1F1F] rounded-3xl p-6 flex flex-wrap gap-x-12 gap-y-6">
+            {( [
+              { label: "Candidature", val: candidature, set: setCandidature, opts: CANDIDATURE_OPTIONS },
+              { label: "Gender", val: gender, set: setGender, opts: GENDER_OPTIONS },
+              { label: "Seat Level", val: level, set: setLevel, opts: LEVEL_OPTIONS }
+            ] as const ).map((group) => (
+              <div key={group.label}>
+                <label className="block text-[10px] font-mono text-[#888] mb-3 uppercase tracking-[0.2em]">{group.label}</label>
+                <div className="flex flex-wrap bg-[#111] rounded-xl p-1 w-fit border border-[#222]">
+                  {group.opts.map((o) => (
+                    <button
+                      key={o.value} onClick={() => group.set(o.value as any)}
+                      className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${group.val === o.value ? 'bg-white text-black' : 'text-[#666] hover:text-white'}`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
-        </details>
+        )}
       </div>
 
-      {/* Results Engine */}
+      {/* RESULTS */}
       {!hasValidMerit ? (
-        <div className="text-center py-20 px-4">
-          <div className="w-16 h-16 bg-white border border-slate-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-             <Search className="h-6 w-6 text-slate-400" />
-          </div>
-          <h3 className="text-xl font-bold text-slate-800 mb-2">Ready to align options</h3>
-          <p className="text-sm text-slate-500 max-w-sm mx-auto">Enter your precise merit percentage above to discover polytechnic institutions you qualify for.</p>
+        <div className="py-24 text-center">
+          <Cpu className="mx-auto h-12 w-12 text-[#222] mb-6" />
+          <h2 className="text-2xl font-black text-[#666] tracking-tight">ENGINE STANDBY</h2>
+          <p className="text-sm font-mono text-[#444] mt-2">AWAITING MERIT PARAMETERS...</p>
         </div>
       ) : isCalculating ? (
-        <div className="space-y-4">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
+        <ScanningLoader />
       ) : results.length === 0 ? (
-        <div className="text-center py-20 px-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
-          <h3 className="text-xl font-bold text-slate-800 mb-2">No Matches Found</h3>
-          <p className="text-sm text-slate-500">Try adjusting your parameters, selecting "Other than Home District", or exploring subsequent CAP rounds.</p>
+        <div className="py-24 text-center border border-dashed border-[#333] rounded-3xl bg-[#050505]">
+          <h2 className="text-2xl font-black text-white tracking-tight mb-2">ZERO MATCHES</h2>
+          <p className="text-sm text-[#888]">Adjust structural parameters to expand search radius.</p>
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center justify-between text-sm font-semibold text-slate-500 px-2">
-            <span><span className="text-slate-900 font-bold text-base">{results.length}</span> eligible branches found</span>
-            <span className="bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm text-xs">Best fit first</span>
+          <div className="flex items-center gap-3 px-2">
+            <div className="h-px bg-[#333] flex-1" />
+            <span className="text-xs font-mono text-[#00FF66] tracking-widest">{results.length} VECTORS IDENTIFIED</span>
+            <div className="h-px bg-[#333] flex-1" />
           </div>
-          
-          <div className="space-y-3">
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {results.slice(0, visibleCount).map((r) => {
               const college = DATA.colleges[r.ci];
-              const branchName = DATA.branches[r.branch];
               const key = `${r.ci}-${r.branch}-${r.round}-${r.seat}`;
               const starred = shortlist.has(key);
               
               return (
                 <div
                   key={key}
-                  className="group flex flex-col md:flex-row md:items-center gap-4 bg-white border border-slate-200 hover:border-indigo-300 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200"
+                  className="group relative bg-[#080808] border border-[#1F1F1F] hover:border-[#444] rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(255,255,255,0.05)] overflow-hidden"
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2.5">
-                      <StatusBadge status={college.status} />
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100">Code: {college.code}</span>
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-indigo-700 transition-colors">{college.name}</h3>
-                    <div className="text-sm font-medium text-slate-500 flex items-center gap-2 mt-2">
-                      <GraduationCap className="h-4 w-4 text-slate-400" /> {branchName}
-                    </div>
-                  </div>
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#222] group-hover:bg-[#00FF66] transition-colors" />
                   
-                  <div className="flex items-center justify-between md:justify-end gap-6 pt-4 md:pt-0 border-t md:border-none border-slate-100 mt-2 md:mt-0">
-                    <div className="text-right flex flex-col items-end">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Historical Cutoff</span>
-                      <span className="text-lg font-black text-slate-800 tabular-nums leading-none mb-2">{r.merit.toFixed(2)}%</span>
-                      <MarginBar merit={meritNum} cutoff={r.merit} />
-                    </div>
-
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="text-[10px] font-mono text-[#888] bg-[#111] px-2 py-1 rounded">SYS_CODE: {college.code}</span>
                     <button
                       onClick={() => toggleShortlist(key)}
-                      className={`shrink-0 p-3.5 rounded-xl border transition-all duration-200 ${
-                        starred 
-                          ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm" 
-                          : "bg-white border-slate-200 text-slate-400 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50"
-                      }`}
-                      aria-label="Add to Option Form"
+                      className={`p-2 rounded-lg transition-all ${starred ? "bg-white text-black" : "bg-[#111] text-[#666] hover:text-white"}`}
                     >
-                      <Star className={`h-5 w-5 ${starred ? "fill-current" : ""}`} />
+                      <Star size={16} className={starred ? "fill-current" : ""} />
                     </button>
+                  </div>
+                  
+                  <h3 className="text-lg font-bold text-white leading-tight mb-2 pr-4">{college.name}</h3>
+                  <div className="flex items-center gap-2 text-sm text-[#888] mb-6">
+                    <GraduationCap size={14} /> {DATA.branches[r.branch]}
+                  </div>
+                  
+                  <div className="flex items-end justify-between border-t border-[#111] pt-4">
+                    <div>
+                      <p className="text-[10px] font-mono text-[#666] uppercase mb-1">Threshold</p>
+                      <p className="text-xl font-black text-white tabular-nums">{r.merit.toFixed(2)}%</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-mono text-[#666] uppercase mb-1">Delta</p>
+                      <p className={`text-lg font-black tabular-nums ${(meritNum - r.merit) >= 5 ? 'text-[#00FF66]' : 'text-[#FFCC00]'}`}>
+                        +{(meritNum - r.merit).toFixed(2)}%
+                      </p>
+                    </div>
                   </div>
                 </div>
               );
@@ -399,10 +286,10 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
           
           {visibleCount < results.length && (
             <button
-              onClick={() => setVisibleCount((v) => v + 50)}
-              className="w-full py-4 rounded-2xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-sm font-bold flex items-center justify-center gap-2 shadow-sm mt-6"
+              onClick={() => setVisibleCount(v => v + 20)}
+              className="w-full py-5 rounded-2xl bg-[#080808] border border-[#1F1F1F] text-[#888] hover:text-white hover:border-[#444] transition-all text-xs font-mono tracking-widest uppercase mt-4 flex items-center justify-center gap-2"
             >
-              Load Additional Options <ArrowRight className="h-4 w-4" />
+              Fetch Next Sequence <ChevronRight size={14} />
             </button>
           )}
         </div>
@@ -411,7 +298,116 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
   );
 }
 
-// ---------- Option Form Mode ----------
+// ---------- DIRECTORY MODE ----------
+
+function BrowseMode({ expandedCourse, setExpandedCourse }: { expandedCourse: string | null; setExpandedCourse: (val: string | null) => void; }) {
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return DATA.colleges.slice(0, 30);
+    const q = query.toLowerCase();
+    return DATA.colleges.filter((c) => c.name.toLowerCase().includes(q) || c.code.includes(q));
+  }, [query]);
+
+  return (
+    <div className="space-y-6 relative z-10 animate-in fade-in duration-700">
+      <div className="bg-[#080808] border border-[#1F1F1F] rounded-3xl p-4">
+        <div className="relative">
+          <Search className="absolute left-4 top-4 h-5 w-5 text-[#666]" />
+          <input
+            type="text"
+            placeholder="Query database by institute name or code..."
+            className="w-full pl-12 pr-4 py-3 bg-[#111] border border-[#222] rounded-2xl focus:border-[#00FF66] outline-none transition-all text-white placeholder:text-[#555] font-mono text-sm"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {!query.trim() && (
+        <div className="text-[10px] font-mono text-[#666] px-2 uppercase tracking-[0.2em]">Displaying partial index (30 of {DATA.colleges.length})</div>
+      )}
+
+      <div className="space-y-4">
+        {filtered.length === 0 ? (
+          <div className="text-center text-[#666] py-16 font-mono text-sm uppercase bg-[#080808] border border-[#1F1F1F] rounded-3xl">Zero matching records.</div>
+        ) : (
+          filtered.map((college) => (
+            <div key={college.code} className="bg-[#080808] rounded-3xl border border-[#1F1F1F] overflow-hidden hover:border-[#333] transition-colors">
+              <div className="p-6 md:p-8 flex flex-col gap-4 border-b border-[#111]">
+                <div className="flex items-center gap-3">
+                  <span className="px-2 py-1 text-[10px] font-mono font-bold tracking-widest uppercase bg-[#111] text-[#888] rounded">
+                    SYS_CODE: {college.code}
+                  </span>
+                  <span className="px-2 py-1 text-[10px] font-mono font-bold tracking-widest uppercase bg-[#111] text-[#888] rounded">
+                    {college.status}
+                  </span>
+                </div>
+                <h2 className="text-xl md:text-2xl font-bold flex items-center gap-3 text-white">
+                  <Building2 className="h-5 w-5 text-[#00FF66]" /> {college.name}
+                </h2>
+              </div>
+
+              <div className="p-4 space-y-2 bg-[#050505]">
+                {college.courses.map(([branchIdx, cutoffs], idx) => {
+                  const courseId = `${college.code}-${idx}`;
+                  const branchName = DATA.branches[branchIdx];
+                  const isOpen = expandedCourse === courseId;
+                  
+                  return (
+                    <div key={courseId} className="bg-[#0A0A0A] border border-[#111] rounded-2xl overflow-hidden transition-all">
+                      <button
+                        onClick={() => setExpandedCourse(isOpen ? null : courseId)}
+                        className="w-full flex items-center justify-between p-5 hover:bg-[#111] transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <GraduationCap className="h-5 w-5 text-[#666]" />
+                          <span className="font-bold text-left text-slate-300">{branchName}</span>
+                        </div>
+                        {isOpen ? <ChevronUp className="h-5 w-5 text-[#666]" /> : <ChevronDown className="h-5 w-5 text-[#666]" />}
+                      </button>
+
+                      {isOpen && (
+                        <div className="border-t border-[#111] overflow-x-auto">
+                          <table className="w-full text-sm text-left">
+                            <thead className="text-[10px] font-mono uppercase tracking-widest text-[#666] bg-[#050505]">
+                              <tr>
+                                <th className="px-5 py-4 font-bold">Round</th>
+                                <th className="px-5 py-4 font-bold">Seat Type</th>
+                                <th className="px-5 py-4 font-bold text-right">Cutoff</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#111]">
+                              {cutoffs.slice().sort((a, b) => a[0] - b[0] || b[3] - a[3]).map(([round, seatIdx, stageIdx, merit], cIdx) => {
+                                const decoded = decodeSeat(DATA.seatTypes[seatIdx]);
+                                return (
+                                  <tr key={cIdx} className="hover:bg-[#111] transition-colors">
+                                    <td className="px-5 py-4 font-mono font-bold text-white">R{round}</td>
+                                    <td className="px-5 py-4">
+                                      <span title={decoded.code} className="text-slate-300 font-semibold cursor-help">{decoded.label}</span>
+                                      <span className="block text-[10px] font-mono text-[#666] mt-1">{DATA.stages[stageIdx]}</span>
+                                    </td>
+                                    <td className="px-5 py-4 font-black text-right text-[#00FF66] tabular-nums">{merit.toFixed(2)}%</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------- OPTION FORM MODE ----------
 
 function OptionFormMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; toggleShortlist: (key: string) => void; }) {
   const [copied, setCopied] = useState(false);
@@ -432,69 +428,68 @@ function OptionFormMode({ shortlist, toggleShortlist }: { shortlist: Set<string>
   });
 
   return (
-    <div className="animate-in fade-in duration-300">
+    <div className="animate-in fade-in duration-700 relative z-10">
       
-      <div className="hidden print:block mb-8 border-b-2 border-black pb-4">
-        <h1 className="text-3xl font-bold text-black">DTE Option Form Choices</h1>
-        <p className="text-sm font-medium text-slate-500 mt-1">Generated via MahaPoly System</p>
+      <div className="hidden print:block mb-8 border-b-4 border-black pb-4">
+        <h1 className="text-4xl font-black text-black tracking-tighter">DTE Option Form</h1>
+        <p className="text-sm font-bold text-gray-500 mt-1 uppercase tracking-widest">MAHA_POLY GENERATED SEQUENCE</p>
       </div>
 
-      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 print:bg-transparent print:border-none print:shadow-none print:p-0">
+      <div className="bg-[#080808] border border-[#1F1F1F] rounded-3xl p-6 md:p-10 print:bg-transparent print:border-none print:p-0">
         
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8 print:hidden">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Staged Option Form</h2>
-            <p className="text-sm text-slate-500 mt-1">Review and order your selected branches before official submission.</p>
+            <h2 className="text-2xl font-black text-white tracking-tight">STAGED VECTORS</h2>
+            <p className="text-[10px] font-mono text-[#666] mt-1 uppercase tracking-widest">Ready for portal execution.</p>
           </div>
 
           <div className="flex gap-3 w-full sm:w-auto">
             <button
               onClick={handleShare}
               disabled={shortlist.size === 0}
-              className="flex-1 sm:flex-none px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-sm"
+              className="flex-1 sm:flex-none px-6 py-3 bg-[#111] hover:bg-[#222] border border-[#333] text-white font-mono text-xs font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50"
             >
-              {copied ? <Check size={18} className="text-emerald-500" /> : <Share2 size={18} />} Share List
+              <Share2 size={16} /> {copied ? 'COPIED' : 'SHARE'}
             </button>
             <button
               onClick={() => window.print()}
               disabled={shortlist.size === 0}
-              className="flex-1 sm:flex-none px-5 py-2.5 bg-indigo-600 text-white hover:bg-indigo-700 font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-sm shadow-indigo-600/20"
+              className="flex-1 sm:flex-none px-6 py-3 bg-white text-black hover:bg-gray-200 font-mono text-xs font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
             >
-              <Printer size={18} /> Print Form
+              <Printer size={16} /> PRINT
             </button>
           </div>
         </div>
 
         {shortlist.size === 0 ? (
-          <div className="py-20 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50">
-            <Star className="h-8 w-8 text-slate-300 mx-auto mb-3" />
-            <p className="text-lg font-bold text-slate-600 mb-1">Your list is empty</p>
-            <p className="text-sm text-slate-500">Return to the search tab and click the star icon to stage your choices here.</p>
+          <div className="py-20 text-center text-[#666] bg-[#050505] border border-dashed border-[#222] rounded-2xl">
+            <p className="text-xl font-black text-[#888] mb-2 tracking-tight">ZERO STAGED VECTORS</p>
+            <p className="text-xs font-mono uppercase tracking-widest">Return to engine and engage star protocols.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 print:border-slate-400">
+          <div className="overflow-x-auto border border-[#1F1F1F] rounded-2xl print:border-gray-300">
             <table className="w-full text-left print:text-black">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs tracking-wider uppercase font-bold text-slate-500 print:bg-slate-100 print:border-slate-400 print:text-slate-800">
-                  <th className="px-5 py-4 text-center w-16">Pref</th>
-                  <th className="px-5 py-4 w-28">Inst. Code</th>
-                  <th className="px-5 py-4">Institution Name</th>
-                  <th className="px-5 py-4">Branch</th>
-                  <th className="px-5 py-4 text-right w-24">Cutoff</th>
-                  <th className="px-5 py-4 text-center w-16 print:hidden"></th>
+                <tr className="bg-[#111] text-[10px] font-mono tracking-widest uppercase font-bold text-[#666] print:bg-gray-100 print:text-black">
+                  <th className="px-6 py-5 text-center">ID</th>
+                  <th className="px-6 py-5">SYS_CODE</th>
+                  <th className="px-6 py-5">INSTITUTION</th>
+                  <th className="px-6 py-5">BRANCH</th>
+                  <th className="px-6 py-5 text-right">THRESHOLD</th>
+                  <th className="px-6 py-5 text-center print:hidden"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 print:divide-slate-300">
+              <tbody className="divide-y divide-[#1F1F1F] print:divide-gray-300">
                 {rows.map((item, index) => (
-                  <tr key={item.key} className="hover:bg-slate-50 transition-colors print:bg-transparent">
-                    <td className="px-5 py-4 font-black text-indigo-600 text-center print:text-slate-900">{index + 1}</td>
-                    <td className="px-5 py-4 font-mono font-medium text-slate-500 print:text-slate-700">{item.code}</td>
-                    <td className="px-5 py-4 font-bold text-slate-800 print:text-slate-900">{item.name}</td>
-                    <td className="px-5 py-4 font-medium text-slate-600 print:text-slate-800">{item.branch}</td>
-                    <td className="px-5 py-4 font-bold text-right text-slate-800 tabular-nums print:text-slate-900">{item.merit.toFixed(2)}%</td>
-                    <td className="px-5 py-4 text-center print:hidden">
-                      <button onClick={() => toggleShortlist(item.key)} className="text-slate-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 transition-colors">
-                        <X size={18} />
+                  <tr key={item.key} className="hover:bg-[#111] transition-colors print:bg-transparent">
+                    <td className="px-6 py-5 font-black text-xl text-center text-white print:text-black">{index + 1}</td>
+                    <td className="px-6 py-5 font-mono text-sm text-[#888] print:text-gray-600">{item.code}</td>
+                    <td className="px-6 py-5 font-bold text-white print:text-black">{item.name}</td>
+                    <td className="px-6 py-5 font-medium text-[#888] print:text-gray-800">{item.branch}</td>
+                    <td className="px-6 py-5 font-black text-right text-[#00FF66] text-lg tabular-nums print:text-black">{item.merit.toFixed(2)}%</td>
+                    <td className="px-6 py-5 text-center print:hidden">
+                      <button onClick={() => toggleShortlist(item.key)} className="text-[#444] hover:text-red-500 bg-[#111] p-3 rounded-lg transition-colors">
+                        <X size={16} />
                       </button>
                     </td>
                   </tr>
@@ -508,135 +503,85 @@ function OptionFormMode({ shortlist, toggleShortlist }: { shortlist: Set<string>
   );
 }
 
-// ---------- Onboarding Tutorial Overlay ----------
-
-function TutorialModal({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
-        <button onClick={onClose} className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full p-1.5 transition-colors">
-          <X size={20} />
-        </button>
-        
-        <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center mb-6">
-          <Search className="h-6 w-6 text-indigo-600" />
-        </div>
-        
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Welcome to MahaPoly</h2>
-        <p className="text-slate-500 text-sm mb-8 leading-relaxed">Your data-driven portal for identifying polytechnic admissions based on real historical cutoffs.</p>
-        
-        <div className="space-y-6 mb-8">
-          <div className="flex gap-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-sm">1</div>
-            <div>
-              <h4 className="font-bold text-slate-800 text-sm">Enter Parameters</h4>
-              <p className="text-xs text-slate-500 mt-1">Input your expected merit percentage and category.</p>
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-sm">2</div>
-            <div>
-              <h4 className="font-bold text-slate-800 text-sm">Review Matches</h4>
-              <p className="text-xs text-slate-500 mt-1">The system automatically ranks options by probability and margin.</p>
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center text-sm"><Star size={14} className="fill-current"/></div>
-            <div>
-              <h4 className="font-bold text-slate-800 text-sm">Stage the Form</h4>
-              <p className="text-xs text-slate-500 mt-1">Star the branches you want. They sync directly to a printable DTE Option Form.</p>
-            </div>
-          </div>
-        </div>
-        
-        <button onClick={onClose} className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors shadow-md">
-          Start Exploring
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ---------- Root Shell ----------
+// ---------- ROOT SHELL ----------
 
 export default function PolytechnicDashboard() {
-  const [mode, setMode] = useState<"match" | "option-form">("match");
+  const [mode, setMode] = useState<"match" | "browse" | "option-form">("match");
   const [shortlist, setShortlist] = useState<Set<string>>(new Set());
-  const [showTutorial, setShowTutorial] = useState(false);
+  const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
+  const [booting, setBooting] = useState(true);
 
   useEffect(() => {
-    // Check local storage for shortlist and tutorial state
-    try {
-      const savedList = localStorage.getItem("mahapoly-shortlist");
-      if (savedList) setShortlist(new Set(JSON.parse(savedList)));
-      
-      const hasSeenTutorial = localStorage.getItem("mahapoly-tutorial-seen");
-      if (!hasSeenTutorial) {
-        setShowTutorial(true);
-      }
-    } catch {}
+    const savedList = localStorage.getItem("mahapoly-shortlist");
+    if (savedList) setShortlist(new Set(JSON.parse(savedList)));
+    
+    const hasBooted = sessionStorage.getItem("mahapoly-booted");
+    if (hasBooted) {
+      setBooting(false);
+    }
   }, []);
 
-  const dismissTutorial = () => {
-    setShowTutorial(false);
-    localStorage.setItem("mahapoly-tutorial-seen", "true");
+  const finishBoot = () => {
+    setBooting(false);
+    sessionStorage.setItem("mahapoly-booted", "true");
   };
 
-  const toggleShortlist = (key: string) => {
-    setShortlist((prev) => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
-      try { localStorage.setItem("mahapoly-shortlist", JSON.stringify(Array.from(next))); } catch {}
-      return next;
-    });
-  };
+  if (booting) return <BootSequence onComplete={finishBoot} />;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-indigo-100">
+    <div className="min-h-screen bg-[#030303] text-white font-sans selection:bg-white selection:text-black relative overflow-hidden">
       
-      {showTutorial && <TutorialModal onClose={dismissTutorial} />}
+      {/* SPATIAL GRID BACKGROUND */}
+      <div className="fixed inset-0 z-0 pointer-events-none print:hidden opacity-10"
+           style={{ backgroundImage: 'linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      
+      {/* CINEMATIC GLOWS */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-white/5 blur-[120px] rounded-full pointer-events-none print:hidden" />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 space-y-10 print:p-0">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 relative z-10 print:p-0">
         
-        {/* Clean Header */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 print:hidden">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-indigo-600 uppercase">
-              <MapPin size={14} /> Maharashtra DTE Portal
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 print:hidden">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 text-[10px] font-mono font-bold tracking-widest text-[#888] uppercase border border-[#222] bg-[#0A0A0A] px-3 py-1 rounded-full">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#00FF66] animate-pulse" /> Live DTE Database
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">
-              MahaPoly
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white drop-shadow-2xl">
+              MAHA<span className="text-[#444]">POLY</span>
             </h1>
-            <p className="text-slate-500 text-sm font-medium max-w-md">
-              Intelligent cutoff aggregation across {DATA.colleges.length} state institutions.
-            </p>
           </div>
 
-          {/* Segmented Control - Native App Style */}
-          <div className="flex bg-slate-200/50 p-1.5 rounded-2xl w-fit border border-slate-200 shadow-inner">
+          <div className="flex bg-[#0A0A0A] p-1.5 rounded-2xl w-fit border border-[#1F1F1F] backdrop-blur-xl shadow-2xl">
             <button
               onClick={() => setMode("match")}
-              className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
-                mode === "match" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              className={`px-6 py-3 rounded-xl text-xs font-mono font-bold tracking-widest uppercase transition-all duration-300 ${
+                mode === "match" ? "bg-white text-black shadow-lg" : "text-[#666] hover:text-white"
               }`}
             >
-              Search Engine
+              Engine
+            </button>
+            <button
+              onClick={() => setMode("browse")}
+              className={`px-6 py-3 rounded-xl text-xs font-mono font-bold tracking-widest uppercase transition-all duration-300 ${
+                mode === "browse" ? "bg-white text-black shadow-lg" : "text-[#666] hover:text-white"
+              }`}
+            >
+              Directory
             </button>
             <button
               onClick={() => setMode("option-form")}
-              className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center gap-2 ${
-                mode === "option-form" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              className={`px-6 py-3 rounded-xl text-xs font-mono font-bold tracking-widest uppercase transition-all duration-300 flex items-center gap-2 ${
+                mode === "option-form" ? "bg-white text-black shadow-lg" : "text-[#666] hover:text-white"
               }`}
             >
-              <Star size={16} className={shortlist.size > 0 ? "fill-indigo-500 text-indigo-500" : ""} />
-              Staged Form {shortlist.size > 0 && <span className="bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-md text-[10px] leading-none">{shortlist.size}</span>}
+              <Star size={14} className={shortlist.size > 0 ? "fill-current" : ""} />
+              Staged ({shortlist.size})
             </button>
           </div>
         </header>
 
-        {/* View Router */}
-        {mode === "match" && <MatchMode shortlist={shortlist} toggleShortlist={toggleShortlist} />}
-        {mode === "option-form" && <OptionFormMode shortlist={shortlist} toggleShortlist={toggleShortlist} />}
+        {mode === "match" && <MatchMode shortlist={shortlist} toggleShortlist={(k) => setShortlist(p => { const n = new Set(p); n.has(k) ? n.delete(k) : n.add(k); localStorage.setItem("mahapoly-shortlist", JSON.stringify(Array.from(n))); return n; })} />}
+        {mode === "browse" && <BrowseMode expandedCourse={expandedCourse} setExpandedCourse={setExpandedCourse} />}
+        {mode === "option-form" && <OptionFormMode shortlist={shortlist} toggleShortlist={(k) => setShortlist(p => { const n = new Set(p); n.has(k) ? n.delete(k) : n.add(k); localStorage.setItem("mahapoly-shortlist", JSON.stringify(Array.from(n))); return n; })} />}
         
       </div>
     </div>
