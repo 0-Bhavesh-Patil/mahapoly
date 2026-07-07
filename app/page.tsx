@@ -13,9 +13,8 @@ import {
   Share2,
   Printer,
   Check,
-  Layers,
-  Box,
-  Cpu
+  ArrowRight,
+  Info
 } from "lucide-react";
 import raw from "../data.json";
 import {
@@ -30,14 +29,13 @@ import {
   type Level,
 } from "../lib/seatTypes";
 
-// ---------- CORE DATA LAYER (PRESERVED) ----------
+// ---------- CORE DATA LAYER (UNTOUCHED) ----------
 type RawCutoff = [number, number, number, number];
 type RawCourse = [number, RawCutoff[]];
 type RawCollege = { code: string; name: string; status: string; courses: RawCourse[] };
 type RawData = { branches: string[]; seatTypes: string[]; stages: string[]; colleges: RawCollege[] };
 
 const DATA = raw as unknown as RawData;
-
 type FlatRow = { ci: number; branch: number; round: number; seat: number; stage: number; merit: number };
 
 const FLAT: FlatRow[] = (() => {
@@ -55,16 +53,16 @@ const FLAT: FlatRow[] = (() => {
 const BRANCH_LIST = DATA.branches.map((name, idx) => ({ idx, name })).sort((a, b) => a.name.localeCompare(b.name));
 const SEAT_INDEX = new Map<string, number>(DATA.seatTypes.map((s, i) => [s, i]));
 
-// ---------- 3D & UI ATOMS ----------
+// ---------- PREMIUM UI ATOMS ----------
 
 function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode; }) {
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 border flex-1 text-center ${
+      className={`px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-300 border flex-1 text-center ${
         active
-          ? "bg-gradient-to-br from-cyan-400 to-blue-600 text-white border-transparent shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-          : "bg-[#111] border-[#222] text-[#888] hover:border-[#444] hover:text-white"
+          ? "bg-white text-black border-white shadow-[0_4px_14px_rgba(255,255,255,0.15)]"
+          : "bg-transparent border-zinc-800 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
       }`}
     >
       {children}
@@ -76,10 +74,10 @@ function StatusBadge({ status }: { status: string }) {
   const isGovt = status.startsWith("Government") && !status.includes("Aided");
   return (
     <span
-      className={`px-2 py-1 text-[9px] font-black tracking-widest rounded uppercase border ${
+      className={`px-2.5 py-1 text-[10px] font-bold tracking-widest rounded uppercase border ${
         isGovt 
-          ? "bg-cyan-500/10 border-cyan-500/40 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]" 
-          : "bg-[#1A1A1A] border-[#333] text-[#888]"
+          ? "bg-blue-500/10 border-blue-500/30 text-blue-400" 
+          : "bg-zinc-900 border-zinc-800 text-zinc-400"
       }`}
     >
       {status}
@@ -89,96 +87,72 @@ function StatusBadge({ status }: { status: string }) {
 
 function MarginBar({ merit, cutoff }: { merit: number; cutoff: number }) {
   const margin = merit - cutoff;
-  const color = margin >= 5 ? "#00F0FF" : margin >= 0 ? "#7C3AED" : "#444"; 
+  const color = margin >= 5 ? "#10B981" : margin >= 0 ? "#3B82F6" : "#52525B"; 
   const pct = Math.max(4, Math.min(100, (cutoff / 100) * 100));
   
   return (
-    <div className="flex flex-col gap-1 w-full max-w-[140px]">
+    <div className="flex flex-col gap-1.5 w-full max-w-[160px]">
       <div className="flex items-center justify-between">
-         <span className="text-[10px] font-mono text-[#666] uppercase">Delta</span>
-         <span className="text-xs font-black tabular-nums" style={{ color: margin >= 0 ? color : '#666' }}>
+         <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">Delta Margin</span>
+         <span className="text-xs font-bold tabular-nums" style={{ color: margin >= 0 ? color : '#71717A' }}>
           {margin >= 0 ? '+' : ''}{margin.toFixed(2)}%
         </span>
       </div>
-      <div className="relative w-full h-1.5 rounded-full bg-[#111] border border-[#222] overflow-hidden">
-        <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-700 shadow-[0_0_10px_currentColor]" style={{ width: `${pct}%`, backgroundColor: color, color: color }} />
+      <div className="relative w-full h-1 rounded-full bg-zinc-900 overflow-hidden">
+        <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out" style={{ width: `${pct}%`, backgroundColor: color }} />
       </div>
     </div>
   );
 }
 
-// 3D CSS LOADER
-function Loader3D() {
+// MATURE LOADING STATE: Elegant gradient sweep skeleton
+function EnterpriseLoader() {
   return (
-    <div className="flex flex-col items-center justify-center py-32 space-y-8 animate-in fade-in">
-      <div className="perspective-[1000px] w-24 h-24">
-        <div className="w-full h-full relative preserve-3d animate-[spin3D_3s_linear_infinite]">
-          {/* 3D Cube Faces */}
-          <div className="absolute inset-0 border-2 border-cyan-400 bg-cyan-500/10 shadow-[0_0_30px_rgba(6,182,212,0.3)] translate-z-12 flex items-center justify-center"><Cpu size={32} className="text-cyan-400 opacity-50"/></div>
-          <div className="absolute inset-0 border-2 border-purple-500 bg-purple-500/10 -translate-z-12"></div>
-          <div className="absolute inset-0 border-2 border-blue-500 bg-blue-500/10 rotate-y-90 translate-x-12"></div>
-          <div className="absolute inset-0 border-2 border-blue-500 bg-blue-500/10 rotate-y-90 -translate-x-12"></div>
-          <div className="absolute inset-0 border-2 border-cyan-500 bg-cyan-500/10 rotate-x-90 -translate-y-12"></div>
-          <div className="absolute inset-0 border-2 border-cyan-500 bg-cyan-500/10 rotate-x-90 translate-y-12"></div>
+    <div className="w-full space-y-4 animate-in fade-in duration-500">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="w-full bg-zinc-950 border border-zinc-800/50 rounded-2xl p-6 relative overflow-hidden">
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+          <div className="flex justify-between items-start">
+            <div className="space-y-4 w-2/3">
+              <div className="h-4 w-24 bg-zinc-900 rounded" />
+              <div className="h-6 w-full max-w-md bg-zinc-800/50 rounded" />
+              <div className="h-4 w-48 bg-zinc-900 rounded" />
+            </div>
+            <div className="space-y-3 items-end flex flex-col">
+              <div className="h-4 w-16 bg-zinc-900 rounded" />
+              <div className="h-8 w-24 bg-zinc-800/50 rounded" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------- INLINE ONBOARDING (MATURE TUTORIAL) ----------
+
+function QuickStartModule({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-6 mb-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between animate-in fade-in duration-500">
+      <div className="flex gap-4 items-start">
+        <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl mt-1">
+          <Info className="text-zinc-400" size={20} />
+        </div>
+        <div>
+          <h3 className="text-lg font-serif font-medium text-zinc-100">System Calibration Required</h3>
+          <p className="text-sm text-zinc-400 mt-1 max-w-2xl leading-relaxed">
+            Configure your aggregate merit percentage and categorical parameters in the control panel below. The engine will automatically filter and rank the historical database to identify your most probable admission vectors.
+          </p>
         </div>
       </div>
-      <p className="text-cyan-400 font-mono text-sm tracking-[0.3em] uppercase animate-pulse">Computing Spatial Matrices</p>
+      <button onClick={onDismiss} className="shrink-0 px-6 py-2.5 bg-white text-black text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors">
+        Acknowledge
+      </button>
     </div>
   );
 }
 
-// 3D SPATIAL TUTORIAL
-function SpatialTutorial({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050505]/80 backdrop-blur-xl animate-in fade-in duration-500">
-      <div className="relative w-full max-w-5xl px-8 flex flex-col items-center">
-        
-        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-12 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] text-center">
-          SYSTEM <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">ONBOARDING</span>
-        </h2>
-
-        {/* 3D Floating Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 perspective-[2000px] w-full mb-16">
-          
-          <div className="bg-gradient-to-b from-[#111] to-[#0A0A0A] border border-[#222] p-8 rounded-3xl transform-gpu rotate-y-[15deg] rotate-x-[10deg] hover:rotate-y-0 hover:rotate-x-0 transition-all duration-500 shadow-[-20px_20px_30px_rgba(0,0,0,0.5)]">
-            <div className="w-12 h-12 bg-cyan-500/20 rounded-2xl border border-cyan-500/40 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(6,182,212,0.2)]">
-              <SlidersHorizontal className="text-cyan-400" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">Configure Parameters</h3>
-            <p className="text-[#888] text-sm">Input your merit percentage into the high-density sidebar grid to calibrate the engine.</p>
-          </div>
-
-          <div className="bg-gradient-to-b from-[#111] to-[#0A0A0A] border border-[#222] p-8 rounded-3xl transform-gpu hover:-translate-y-4 transition-all duration-500 shadow-[0_20px_30px_rgba(0,0,0,0.5)] relative z-10">
-            <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent rounded-3xl pointer-events-none" />
-            <div className="w-12 h-12 bg-purple-500/20 rounded-2xl border border-purple-500/40 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
-              <Layers className="text-purple-400" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">Analyze Spatial Data</h3>
-            <p className="text-[#888] text-sm">Review the computed matrix. The system automatically calculates delta margins for every branch.</p>
-          </div>
-
-          <div className="bg-gradient-to-b from-[#111] to-[#0A0A0A] border border-[#222] p-8 rounded-3xl transform-gpu -rotate-y-[15deg] rotate-x-[10deg] hover:rotate-y-0 hover:rotate-x-0 transition-all duration-500 shadow-[20px_20px_30px_rgba(0,0,0,0.5)]">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl border border-blue-500/40 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
-              <Star className="text-blue-400 fill-blue-400" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">Stage Option Form</h3>
-            <p className="text-[#888] text-sm">Select branches to instantly generate a printable, shareable DTE Option Form sequence.</p>
-          </div>
-
-        </div>
-
-        <button 
-          onClick={onClose}
-          className="px-12 py-4 bg-white text-black font-black text-sm uppercase tracking-[0.2em] rounded-full hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.3)]"
-        >
-          Initialize Workspace
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ---------- MATCH MODE (WIDE DASHBOARD GRID) ----------
+// ---------- MATCH ENGINE (ENTERPRISE DASHBOARD) ----------
 
 function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; toggleShortlist: (key: string) => void; }) {
   const [merit, setMerit] = useState<string>("");
@@ -187,9 +161,10 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
   const [gender, setGender] = useState<Gender>("G");
   const [level, setLevel] = useState<Level>("H");
   const [round, setRound] = useState(1);
-  const [branchFilter, setBranchFilter] = useState<Set<number>>(new Set());
   const [branchQuery, setBranchQuery] = useState("");
+  const [branchFilter, setBranchFilter] = useState<Set<number>>(new Set());
   const [isCalculating, setIsCalculating] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(20);
 
   const isSpecialCategory = ["EWS", "TFWS", "DEFOPENS", "ORPHAN", "PWDOPENH"].includes(category);
   const meritNum = parseFloat(merit);
@@ -198,7 +173,7 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
   useEffect(() => {
     if (hasValidMerit) {
       setIsCalculating(true);
-      const timer = setTimeout(() => setIsCalculating(false), 800);
+      const timer = setTimeout(() => setIsCalculating(false), 600);
       return () => clearTimeout(timer);
     }
   }, [merit, category, candidature, gender, level, round, branchFilter, hasValidMerit]);
@@ -213,7 +188,7 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
     for (const row of FLAT) {
       if (row.round !== round) continue;
       if (!seatIdxs.has(row.seat)) continue;
-      if (row.merit > meritNum) continue; 
+      if (row.merit > meritNum) continue;
       if (branchFilter.size > 0 && !branchFilter.has(row.branch)) continue;
       const key = `${row.ci}-${row.branch}`;
       const existing = best.get(key);
@@ -225,64 +200,63 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
   const filteredBranchList = branchQuery ? BRANCH_LIST.filter((b) => b.name.toLowerCase().includes(branchQuery.toLowerCase())) : BRANCH_LIST;
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 animate-in fade-in duration-500">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 animate-in fade-in duration-700">
       
-      {/* LEFT SIDEBAR: STICKY PARAMETER DASHBOARD */}
-      <div className="xl:col-span-4 space-y-6">
-        <div className="sticky top-8 bg-[#050505] border border-[#1A1A1A] rounded-[32px] p-6 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-purple-500 to-transparent" />
-          
-          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-white mb-6 flex items-center gap-2">
-            <Box size={16} className="text-cyan-400" /> Control Matrix
-          </h2>
+      {/* LEFT COLUMN: CONTROL MATRIX */}
+      <div className="lg:col-span-4 space-y-6">
+        <div className="bg-zinc-950 border border-zinc-800/60 rounded-3xl p-6 lg:p-8 lg:sticky lg:top-8">
+          <div className="mb-8">
+            <h2 className="font-serif text-xl font-medium text-white mb-2">Parameters</h2>
+            <p className="text-xs text-zinc-500">Define your structural variables.</p>
+          </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div>
-              <label className="block text-[10px] font-mono text-[#888] mb-2 uppercase tracking-widest">Merit Value</label>
+              <label className="block text-xs font-medium text-zinc-400 mb-2">Target Merit Percentage</label>
               <input
-                type="number" step="0.01" placeholder="82.40"
+                type="number" step="0.01" placeholder="e.g. 82.40"
                 value={merit} onChange={(e) => setMerit(e.target.value)}
-                className="w-full bg-[#0A0A0A] border border-[#222] rounded-2xl px-5 py-4 text-3xl font-black tabular-nums text-white placeholder:text-[#333] focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] outline-none transition-all"
+                className="w-full bg-transparent border-b-2 border-zinc-800 px-0 py-3 text-4xl font-light tabular-nums text-white placeholder:text-zinc-700 focus:border-white focus:outline-none transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono text-[#888] mb-2 uppercase tracking-widest">Category</label>
+              <label className="block text-xs font-medium text-zinc-400 mb-2">Classification</label>
               <select
                 value={category} onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-5 py-4 bg-[#0A0A0A] border border-[#222] rounded-2xl text-sm font-bold text-white focus:border-cyan-400 outline-none transition-all appearance-none"
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3.5 text-sm font-medium text-zinc-200 focus:border-zinc-600 focus:outline-none transition-all appearance-none"
               >
                 {CATEGORY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
 
             {!isSpecialCategory && (
-              <div className="space-y-4 pt-4 border-t border-[#111]">
-                <div className="flex gap-2 w-full">{CANDIDATURE_OPTIONS.map((o) => <Pill key={o.value} active={candidature === o.value} onClick={() => setCandidature(o.value)}>{o.label}</Pill>)}</div>
-                <div className="flex gap-2 w-full">{GENDER_OPTIONS.map((o) => <Pill key={o.value} active={gender === o.value} onClick={() => setGender(o.value)}>{o.label}</Pill>)}</div>
-                <div className="flex gap-2 w-full">{LEVEL_OPTIONS.map((o) => <Pill key={o.value} active={level === o.value} onClick={() => setLevel(o.value)}>{o.label}</Pill>)}</div>
+              <div className="space-y-6 pt-6 border-t border-zinc-800/50">
+                <div className="flex gap-3 w-full">{CANDIDATURE_OPTIONS.map((o) => <Pill key={o.value} active={candidature === o.value} onClick={() => setCandidature(o.value)}>{o.label}</Pill>)}</div>
+                <div className="flex gap-3 w-full">{GENDER_OPTIONS.map((o) => <Pill key={o.value} active={gender === o.value} onClick={() => setGender(o.value)}>{o.label}</Pill>)}</div>
+                <div className="flex gap-3 w-full">{LEVEL_OPTIONS.map((o) => <Pill key={o.value} active={level === o.value} onClick={() => setLevel(o.value)}>{o.label}</Pill>)}</div>
               </div>
             )}
 
-            <div className="pt-4 border-t border-[#111]">
-              <label className="block text-[10px] font-mono text-[#888] mb-2 uppercase tracking-widest">CAP Round Sequence</label>
-              <div className="grid grid-cols-4 gap-2">
+            <div className="pt-6 border-t border-zinc-800/50">
+              <label className="block text-xs font-medium text-zinc-400 mb-3">CAP Round Sequence</label>
+              <div className="flex gap-2">
                 {[1, 2, 3, 4].map((r) => (
-                  <button key={r} onClick={() => setRound(r)} className={`py-3 rounded-xl text-sm font-black transition-all border ${round === r ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]" : "bg-[#0A0A0A] border-[#222] text-[#666] hover:text-white hover:border-[#444]"}`}>R{r}</button>
+                  <button key={r} onClick={() => setRound(r)} className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all border ${round === r ? "bg-white text-black border-white" : "bg-transparent border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600"}`}>R{r}</button>
                 ))}
               </div>
             </div>
 
-            <details className="group pt-4 border-t border-[#111]">
-              <summary className="flex items-center justify-between text-[10px] font-mono font-bold text-[#888] uppercase tracking-widest cursor-pointer hover:text-white list-none transition-colors">
-                <span>Branch Filter {branchFilter.size > 0 && <span className="text-cyan-400 ml-1">({branchFilter.size})</span>}</span>
+            <details className="group pt-6 border-t border-zinc-800/50">
+              <summary className="flex items-center justify-between text-xs font-medium text-zinc-400 cursor-pointer hover:text-white list-none transition-colors">
+                <span className="flex items-center gap-2"><SlidersHorizontal size={14} /> Refine by Branch {branchFilter.size > 0 && <span className="text-white ml-1 font-bold">({branchFilter.size})</span>}</span>
                 <ChevronDown className="h-4 w-4 group-open:rotate-180 transition-transform" />
               </summary>
-              <div className="mt-4 p-4 bg-[#0A0A0A] border border-[#222] rounded-2xl space-y-3">
-                <input type="text" placeholder="Search..." value={branchQuery} onChange={(e) => setBranchQuery(e.target.value)} className="w-full px-3 py-2 bg-[#050505] border border-[#222] rounded-lg text-xs outline-none text-white focus:border-cyan-400 transition-colors" />
-                <div className="flex flex-col gap-1 max-h-40 overflow-y-auto custom-scrollbar pr-2">
+              <div className="mt-4 p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl space-y-4">
+                <input type="text" placeholder="Search branches..." value={branchQuery} onChange={(e) => setBranchQuery(e.target.value)} className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-sm outline-none text-white focus:border-zinc-600 transition-colors" />
+                <div className="flex flex-col gap-1 max-h-48 overflow-y-auto custom-scrollbar pr-2">
                   {filteredBranchList.map((b) => (
-                    <button key={b.idx} onClick={() => { const next = new Set(branchFilter); branchFilter.has(b.idx) ? next.delete(b.idx) : next.add(b.idx); setBranchFilter(next); }} className={`px-3 py-2 rounded-lg text-xs font-semibold text-left transition-colors ${branchFilter.has(b.idx) ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "text-[#888] hover:bg-[#111] hover:text-white"}`}>
+                    <button key={b.idx} onClick={() => { const next = new Set(branchFilter); branchFilter.has(b.idx) ? next.delete(b.idx) : next.add(b.idx); setBranchFilter(next); }} className={`px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors ${branchFilter.has(b.idx) ? "bg-white text-black" : "text-zinc-400 hover:bg-zinc-800 hover:text-white"}`}>
                       {b.name}
                     </button>
                   ))}
@@ -293,66 +267,83 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
         </div>
       </div>
 
-      {/* RIGHT AREA: DATA MATRIX */}
-      <div className="xl:col-span-8">
+      {/* RIGHT COLUMN: DATA MATRIX */}
+      <div className="lg:col-span-8">
         {!hasValidMerit ? (
-          <div className="flex flex-col items-center justify-center h-full min-h-[400px] border border-dashed border-[#222] rounded-[32px] bg-[#050505]/50">
-            <Search className="h-10 w-10 text-[#333] mb-4" />
-            <p className="text-xl font-bold text-[#666]">Engine Awaiting Input</p>
+          <div className="flex flex-col items-center justify-center h-full min-h-[500px] border border-dashed border-zinc-800 rounded-3xl bg-zinc-950/50">
+            <Search className="h-8 w-8 text-zinc-700 mb-4" />
+            <p className="font-serif text-xl font-medium text-zinc-500">Awaiting Parameters</p>
           </div>
         ) : isCalculating ? (
-          <Loader3D />
+          <EnterpriseLoader />
         ) : results.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full min-h-[400px] border border-dashed border-[#222] rounded-[32px] bg-[#050505]/50">
-            <p className="text-2xl font-black text-white">0 VECTORS MATCHED</p>
-            <p className="text-sm text-[#888] mt-2">Expand parameters to increase search radius.</p>
+          <div className="flex flex-col items-center justify-center h-full min-h-[500px] border border-dashed border-zinc-800 rounded-3xl bg-zinc-950/50">
+            <p className="font-serif text-2xl font-medium text-zinc-200">No Eligible Results</p>
+            <p className="text-sm text-zinc-500 mt-2">Adjust your parameters to broaden the search criteria.</p>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="flex items-center justify-between px-2 mb-6">
-              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#888]">
-                Displaying <span className="text-white font-black text-xs">{results.length}</span> Results
+              <div className="text-xs font-medium text-zinc-500">
+                Found <span className="text-white font-bold">{results.length}</span> matching branches
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {results.map((r) => {
+            <div className="grid grid-cols-1 gap-4">
+              {results.slice(0, visibleCount).map((r) => {
                 const college = DATA.colleges[r.ci];
                 const key = `${r.ci}-${r.branch}-${r.round}-${r.seat}`;
                 const starred = shortlist.has(key);
                 
                 return (
-                  <div key={key} className="group flex flex-col justify-between bg-[#080808] border border-[#1A1A1A] hover:border-[#333] rounded-2xl p-5 transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-                    
-                    <div className="mb-6">
-                      <div className="flex items-center justify-between mb-3">
-                        <StatusBadge status={college.status} />
-                        <span className="text-[9px] font-mono text-[#666] uppercase bg-[#111] px-2 py-0.5 rounded">ID: {college.code}</span>
-                      </div>
-                      <h3 className="text-base font-bold text-white leading-tight group-hover:text-cyan-400 transition-colors mb-2 line-clamp-2">{college.name}</h3>
-                      <div className="text-xs font-semibold text-[#888] flex items-center gap-2">
-                        <GraduationCap size={14} className="text-purple-400" /> {DATA.branches[r.branch]}
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-end justify-between pt-4 border-t border-[#111]">
-                      <MarginBar merit={meritNum} cutoff={r.merit} />
+                  <div key={key} className="group bg-zinc-950 border border-zinc-800/60 hover:border-zinc-700 rounded-2xl p-6 transition-all duration-300">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                       
-                      <button
-                        onClick={() => toggleShortlist(key)}
-                        className={`p-3 rounded-xl border transition-all duration-300 ${
-                          starred 
-                            ? "bg-white border-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)] scale-105" 
-                            : "bg-[#0A0A0A] border-[#222] text-[#666] hover:border-[#444] hover:text-white"
-                        }`}
-                      >
-                        <Star size={16} className={starred ? "fill-current" : ""} />
-                      </button>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <StatusBadge status={college.status} />
+                          <span className="text-[10px] text-zinc-500 font-mono">ID: {college.code}</span>
+                        </div>
+                        <h3 className="text-lg font-serif font-medium text-zinc-100 group-hover:text-white transition-colors mb-2 leading-snug pr-4">{college.name}</h3>
+                        <div className="text-sm text-zinc-400 flex items-center gap-2">
+                          <GraduationCap size={14} className="text-zinc-600" /> {DATA.branches[r.branch]}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center md:items-end justify-between md:flex-col gap-6 md:gap-3 w-full md:w-auto border-t md:border-none border-zinc-800 pt-4 md:pt-0">
+                        <div className="text-left md:text-right">
+                          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Historical Cutoff</p>
+                          <p className="text-xl font-light text-white tabular-nums">{r.merit.toFixed(2)}%</p>
+                        </div>
+                        <div className="flex items-center gap-6">
+                          <MarginBar merit={meritNum} cutoff={r.merit} />
+                          <button
+                            onClick={() => toggleShortlist(key)}
+                            className={`p-2.5 rounded-lg border transition-all duration-300 ${
+                              starred 
+                                ? "bg-white border-white text-black" 
+                                : "bg-transparent border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-white"
+                            }`}
+                          >
+                            <Star size={16} className={starred ? "fill-current" : ""} />
+                          </button>
+                        </div>
+                      </div>
+
                     </div>
                   </div>
                 );
               })}
             </div>
+
+            {visibleCount < results.length && (
+              <button
+                onClick={() => setVisibleCount(v => v + 20)}
+                className="w-full py-4 rounded-xl bg-transparent border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-all text-sm font-medium mt-6 flex items-center justify-center gap-2"
+              >
+                Load More Results <ArrowRight size={16} />
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -360,7 +351,7 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
   );
 }
 
-// ---------- DIRECTORY MODE (DENSE GRID) ----------
+// ---------- DIRECTORY MODE ----------
 
 function BrowseMode({ expandedCourse, setExpandedCourse }: { expandedCourse: string | null; setExpandedCourse: (val: string | null) => void; }) {
   const [query, setQuery] = useState("");
@@ -372,62 +363,70 @@ function BrowseMode({ expandedCourse, setExpandedCourse }: { expandedCourse: str
   }, [query]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="w-full max-w-2xl bg-[#050505] border border-[#1A1A1A] rounded-[24px] p-3 shadow-2xl relative">
-        <Search className="absolute left-6 top-6 h-5 w-5 text-[#666]" />
+    <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
+      <div className="bg-zinc-950 border border-zinc-800/60 rounded-2xl p-2 relative">
+        <Search className="absolute left-6 top-5 h-5 w-5 text-zinc-500" />
         <input
-          type="text" placeholder="Query full database by institute or code..." value={query} onChange={(e) => setQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-[#0A0A0A] border border-[#222] rounded-xl outline-none text-white focus:border-cyan-400 text-sm font-mono transition-colors"
+          type="text" placeholder="Search institution by name or code..." value={query} onChange={(e) => setQuery(e.target.value)}
+          className="w-full pl-14 pr-4 py-3 bg-transparent outline-none text-white text-sm transition-colors"
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filtered.map((college) => (
-          <div key={college.code} className="bg-[#050505] rounded-3xl border border-[#1A1A1A] overflow-hidden hover:border-[#333] transition-colors flex flex-col">
-            <div className="p-6 border-b border-[#111] flex-1">
-              <div className="flex items-center justify-between mb-4">
-                <StatusBadge status={college.status} />
-                <span className="text-[10px] font-mono font-bold text-[#666]">#{college.code}</span>
-              </div>
-              <h2 className="text-lg font-bold text-white line-clamp-2">{college.name}</h2>
-            </div>
+      {!query.trim() && (
+        <div className="text-xs text-zinc-500 font-medium px-2">Displaying partial index (30 of {DATA.colleges.length})</div>
+      )}
 
-            <div className="p-3 bg-[#0A0A0A] space-y-2">
-              {college.courses.map(([branchIdx, cutoffs], idx) => {
-                const courseId = `${college.code}-${idx}`;
-                const branchName = DATA.branches[branchIdx];
-                const isOpen = expandedCourse === courseId;
-                
-                return (
-                  <div key={courseId} className="bg-[#050505] border border-[#1A1A1A] rounded-2xl overflow-hidden transition-all">
-                    <button onClick={() => setExpandedCourse(isOpen ? null : courseId)} className="w-full flex items-center justify-between p-4 hover:bg-[#111] transition-colors">
-                      <span className="font-bold text-xs text-left text-slate-300 pr-4">{branchName}</span>
-                      {isOpen ? <ChevronUp size={14} className="text-cyan-400 shrink-0" /> : <ChevronDown size={14} className="text-[#666] shrink-0" />}
-                    </button>
-                    {isOpen && (
-                      <div className="border-t border-[#111] overflow-x-auto bg-[#030303]">
-                        <table className="w-full text-xs text-left">
-                          <thead className="text-[9px] uppercase tracking-widest text-[#666]">
-                            <tr><th className="px-4 py-3">Rnd</th><th className="px-4 py-3">Type</th><th className="px-4 py-3 text-right">Cutoff</th></tr>
-                          </thead>
-                          <tbody className="divide-y divide-[#111]">
-                            {cutoffs.slice().sort((a, b) => a[0] - b[0] || b[3] - a[3]).map(([round, seatIdx, stageIdx, merit], cIdx) => (
-                              <tr key={cIdx} className="hover:bg-[#111]">
-                                <td className="px-4 py-3 font-bold text-white">R{round}</td>
-                                <td className="px-4 py-3"><span title={decodeSeat(DATA.seatTypes[seatIdx]).code} className="text-[#CCC] cursor-help">{decodeSeat(DATA.seatTypes[seatIdx]).label}</span></td>
-                                <td className="px-4 py-3 font-black text-right text-cyan-400 tabular-nums">{merit.toFixed(2)}%</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+      <div className="space-y-4">
+        {filtered.length === 0 ? (
+          <div className="text-center text-zinc-500 py-20 font-serif text-lg bg-zinc-950 border border-dashed border-zinc-800 rounded-3xl">No institutions match your search.</div>
+        ) : (
+          filtered.map((college) => (
+            <div key={college.code} className="bg-zinc-950 rounded-2xl border border-zinc-800/60 overflow-hidden hover:border-zinc-700 transition-colors">
+              <div className="p-6 md:p-8 flex flex-col gap-4 border-b border-zinc-800/50">
+                <div className="flex items-center justify-between mb-2">
+                  <StatusBadge status={college.status} />
+                  <span className="text-[10px] font-mono text-zinc-500">ID: {college.code}</span>
+                </div>
+                <h2 className="text-xl font-serif font-medium text-white">{college.name}</h2>
+              </div>
+
+              <div className="p-4 bg-zinc-900/20 space-y-2">
+                {college.courses.map(([branchIdx, cutoffs], idx) => {
+                  const courseId = `${college.code}-${idx}`;
+                  const branchName = DATA.branches[branchIdx];
+                  const isOpen = expandedCourse === courseId;
+                  
+                  return (
+                    <div key={courseId} className="bg-zinc-950 border border-zinc-800/50 rounded-xl overflow-hidden transition-all">
+                      <button onClick={() => setExpandedCourse(isOpen ? null : courseId)} className="w-full flex items-center justify-between p-4 hover:bg-zinc-900 transition-colors">
+                        <span className="font-medium text-sm text-left text-zinc-300 pr-4">{branchName}</span>
+                        {isOpen ? <ChevronUp size={16} className="text-white shrink-0" /> : <ChevronDown size={16} className="text-zinc-600 shrink-0" />}
+                      </button>
+                      {isOpen && (
+                        <div className="border-t border-zinc-800/50 overflow-x-auto bg-black">
+                          <table className="w-full text-xs text-left">
+                            <thead className="text-[10px] uppercase tracking-wider text-zinc-500 border-b border-zinc-800/50">
+                              <tr><th className="px-5 py-3 font-medium">Round</th><th className="px-5 py-3 font-medium">Seat Type</th><th className="px-5 py-3 font-medium text-right">Cutoff</th></tr>
+                            </thead>
+                            <tbody className="divide-y divide-zinc-900">
+                              {cutoffs.slice().sort((a, b) => a[0] - b[0] || b[3] - a[3]).map(([round, seatIdx, stageIdx, merit], cIdx) => (
+                                <tr key={cIdx} className="hover:bg-zinc-900/50">
+                                  <td className="px-5 py-4 font-bold text-zinc-300">R{round}</td>
+                                  <td className="px-5 py-4"><span title={decodeSeat(DATA.seatTypes[seatIdx]).code} className="text-zinc-400 cursor-help">{decodeSeat(DATA.seatTypes[seatIdx]).label}</span></td>
+                                  <td className="px-5 py-4 font-light text-right text-white tabular-nums">{merit.toFixed(2)}%</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
@@ -452,39 +451,41 @@ function OptionFormMode({ shortlist, toggleShortlist }: { shortlist: Set<string>
 
   return (
     <div className="animate-in fade-in duration-500 w-full max-w-5xl mx-auto">
-      <div className="hidden print:block mb-8 border-b-4 border-black pb-4"><h1 className="text-4xl font-black text-black">DTE Option Form</h1><p className="text-sm font-bold text-gray-500">MahaPoly Generated</p></div>
-      <div className="bg-[#050505] border border-[#1A1A1A] rounded-[32px] p-6 md:p-10 print:bg-transparent print:border-none print:p-0">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8 print:hidden">
-          <div><h2 className="text-3xl font-black text-white">Staged Options</h2><p className="text-sm text-[#888] mt-1">Review selection sequence prior to DTE portal execution.</p></div>
+      <div className="hidden print:block mb-10 border-b border-black pb-6"><h1 className="text-3xl font-serif text-black">DTE Option Form</h1><p className="text-xs text-gray-500 mt-2 uppercase tracking-widest">MahaPoly Document</p></div>
+      
+      <div className="bg-zinc-950 border border-zinc-800/60 rounded-3xl p-6 md:p-10 print:bg-transparent print:border-none print:p-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10 print:hidden">
+          <div><h2 className="text-2xl font-serif font-medium text-white">Staged Options</h2><p className="text-sm text-zinc-500 mt-2">Review sequence prior to official portal submission.</p></div>
           <div className="flex gap-3 w-full sm:w-auto">
-            <button onClick={handleShare} disabled={shortlist.size === 0} className="flex-1 sm:flex-none px-6 py-3 bg-[#111] hover:bg-[#222] border border-[#333] text-white text-xs font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50">
-              {copied ? <Check size={16} className="text-cyan-400" /> : <Share2 size={16} />} Share
+            <button onClick={handleShare} disabled={shortlist.size === 0} className="flex-1 sm:flex-none px-6 py-2.5 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white text-sm font-medium rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50">
+              {copied ? <Check size={16} className="text-emerald-500" /> : <Share2 size={16} />} Share
             </button>
-            <button onClick={() => window.print()} disabled={shortlist.size === 0} className="flex-1 sm:flex-none px-6 py-3 bg-white text-black hover:bg-gray-200 text-xs font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-              <Printer size={16} /> Print
+            <button onClick={() => window.print()} disabled={shortlist.size === 0} className="flex-1 sm:flex-none px-6 py-2.5 bg-white text-black hover:bg-zinc-200 text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50">
+              <Printer size={16} /> Print Document
             </button>
           </div>
         </div>
+
         {shortlist.size === 0 ? (
-          <div className="py-24 text-center border border-dashed border-[#222] rounded-2xl bg-[#0A0A0A]">
-            <Star className="h-10 w-10 text-[#444] mx-auto mb-4" />
-            <p className="text-xl font-bold text-[#888]">No choices staged.</p>
+          <div className="py-24 text-center border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/20">
+            <Star className="h-8 w-8 text-zinc-700 mx-auto mb-4" />
+            <p className="text-lg font-serif text-zinc-400">No choices staged.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-[#1A1A1A] print:border-gray-300">
+          <div className="overflow-x-auto rounded-2xl border border-zinc-800/60 print:border-gray-300">
             <table className="w-full text-left print:text-black">
-              <thead className="bg-[#0A0A0A] border-b border-[#1A1A1A] text-[10px] uppercase tracking-widest font-bold text-[#666] print:bg-gray-100 print:text-black">
-                <tr><th className="px-6 py-5 text-center">Pref</th><th className="px-6 py-5">Code</th><th className="px-6 py-5">Institution</th><th className="px-6 py-5">Branch</th><th className="px-6 py-5 text-right">Cutoff</th><th className="px-6 py-5 print:hidden"></th></tr>
+              <thead className="bg-zinc-900/50 border-b border-zinc-800/60 text-[10px] uppercase tracking-wider font-medium text-zinc-500 print:bg-gray-100 print:text-black">
+                <tr><th className="px-6 py-4 text-center">Pref</th><th className="px-6 py-4">Code</th><th className="px-6 py-4">Institution</th><th className="px-6 py-4">Branch</th><th className="px-6 py-4 text-right">Cutoff</th><th className="px-6 py-4 print:hidden"></th></tr>
               </thead>
-              <tbody className="divide-y divide-[#1A1A1A] print:divide-gray-300">
+              <tbody className="divide-y divide-zinc-800/60 print:divide-gray-300">
                 {rows.map((item, index) => (
-                  <tr key={item.key} className="hover:bg-[#111] transition-colors print:bg-transparent">
-                    <td className="px-6 py-5 font-black text-xl text-center text-cyan-400 print:text-black">{index + 1}</td>
-                    <td className="px-6 py-5 font-mono text-sm text-[#888] print:text-gray-600">{item.code}</td>
-                    <td className="px-6 py-5 font-bold text-[#CCC] print:text-black">{item.name}</td>
-                    <td className="px-6 py-5 font-medium text-[#888] print:text-gray-800">{item.branch}</td>
-                    <td className="px-6 py-5 font-black text-right text-white text-lg tabular-nums print:text-black">{item.merit.toFixed(2)}%</td>
-                    <td className="px-6 py-5 text-center print:hidden"><button onClick={() => toggleShortlist(item.key)} className="text-[#666] hover:text-red-500 p-2 rounded-lg hover:bg-[#1A1A1A]"><X size={18} /></button></td>
+                  <tr key={item.key} className="hover:bg-zinc-900/30 transition-colors print:bg-transparent">
+                    <td className="px-6 py-5 font-bold text-lg text-center text-zinc-300 print:text-black">{index + 1}</td>
+                    <td className="px-6 py-5 font-mono text-sm text-zinc-500 print:text-gray-600">{item.code}</td>
+                    <td className="px-6 py-5 font-medium text-white print:text-black">{item.name}</td>
+                    <td className="px-6 py-5 text-sm text-zinc-400 print:text-gray-800">{item.branch}</td>
+                    <td className="px-6 py-5 font-light text-right text-white text-lg tabular-nums print:text-black">{item.merit.toFixed(2)}%</td>
+                    <td className="px-6 py-5 text-center print:hidden"><button onClick={() => toggleShortlist(item.key)} className="text-zinc-600 hover:text-red-400 p-2 rounded-lg hover:bg-zinc-900 transition-colors"><X size={18} /></button></td>
                   </tr>
                 ))}
               </tbody>
@@ -496,7 +497,7 @@ function OptionFormMode({ shortlist, toggleShortlist }: { shortlist: Set<string>
   );
 }
 
-// ---------- ROOT LAYOUT (FULL WIDE GRID) ----------
+// ---------- ROOT LAYOUT (ENTERPRISE APP SHELL) ----------
 
 export default function PolytechnicDashboard() {
   const [mode, setMode] = useState<"match" | "browse" | "option-form">("match");
@@ -515,43 +516,37 @@ export default function PolytechnicDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#000000] text-white font-sans selection:bg-cyan-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#0A0A0A] text-zinc-100 selection:bg-white selection:text-black overflow-x-hidden">
       
-      {/* 3D CSS GLOBALS */}
+      {/* GLOBAL FONT STACK IMPORTS & ANIMATIONS */}
       <style dangerouslySetInnerHTML={{__html: `
-        .preserve-3d { transform-style: preserve-3d; }
-        .translate-z-12 { transform: translateZ(48px); }
-        .-translate-z-12 { transform: translateZ(-48px); }
-        .rotate-y-90 { transform: rotateY(90deg); }
-        .rotate-x-90 { transform: rotateX(90deg); }
-        .translate-x-12 { transform: rotateY(90deg) translateZ(48px); }
-        .-translate-x-12 { transform: rotateY(90deg) translateZ(-48px); }
-        .translate-y-12 { transform: rotateX(90deg) translateZ(48px); }
-        .-translate-y-12 { transform: rotateX(90deg) translateZ(-48px); }
-        @keyframes spin3D {
-          0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-          100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(0deg); }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
       `}} />
 
-      {showTutorial && <SpatialTutorial onClose={() => { setShowTutorial(false); sessionStorage.setItem("mahapoly-tutorial-seen", "true"); }} />}
-
-      <div className="w-full max-w-[1600px] mx-auto px-4 md:px-8 xl:px-12 py-10 print:p-0">
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-10 print:p-0">
         
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-8 border-b border-[#111] print:hidden">
-          <div className="space-y-2">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white">
-              MAHA<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">POLY</span>
+        {/* INLINE TUTORIAL MODULE */}
+        {showTutorial && (
+          <QuickStartModule onDismiss={() => { setShowTutorial(false); sessionStorage.setItem("mahapoly-tutorial-seen", "true"); }} />
+        )}
+
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 pb-8 border-b border-zinc-800/50 print:hidden">
+          <div className="space-y-3">
+            <h1 className="text-4xl md:text-5xl font-serif font-medium text-white tracking-tight">
+              MahaPoly
             </h1>
-            <p className="text-[#666] text-sm font-medium">
-              Spatial Cutoff Engine // {DATA.colleges.length} Institutions Indexed
+            <p className="text-zinc-500 text-sm">
+              State Polytechnic Admissions Database &middot; {DATA.colleges.length} Institutions
             </p>
           </div>
 
-          <div className="flex bg-[#050505] p-1.5 rounded-2xl border border-[#1A1A1A] w-full md:w-auto overflow-x-auto custom-scrollbar">
-            <button onClick={() => setMode("match")} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap ${mode === "match" ? "bg-white text-black shadow-sm" : "text-[#666] hover:text-white"}`}>Engine</button>
-            <button onClick={() => setMode("browse")} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap ${mode === "browse" ? "bg-white text-black shadow-sm" : "text-[#666] hover:text-white"}`}>Directory</button>
-            <button onClick={() => setMode("option-form")} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 whitespace-nowrap ${mode === "option-form" ? "bg-white text-black shadow-sm" : "text-[#666] hover:text-white"}`}>
+          <div className="flex bg-zinc-950 p-1.5 rounded-xl border border-zinc-800 w-full md:w-auto overflow-x-auto custom-scrollbar">
+            <button onClick={() => setMode("match")} className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${mode === "match" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-300"}`}>Engine</button>
+            <button onClick={() => setMode("browse")} className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${mode === "browse" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-300"}`}>Directory</button>
+            <button onClick={() => setMode("option-form")} className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 whitespace-nowrap ${mode === "option-form" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-300"}`}>
               <Star size={14} className={shortlist.size > 0 ? "fill-current" : ""} /> Form {shortlist.size > 0 && `(${shortlist.size})`}
             </button>
           </div>
