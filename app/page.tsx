@@ -10,11 +10,12 @@ import {
   SlidersHorizontal,
   Star,
   X,
-  ArrowRight,
   Share2,
   Printer,
   Check,
-  MapPin
+  Layers,
+  Box,
+  Cpu
 } from "lucide-react";
 import raw from "../data.json";
 import {
@@ -29,7 +30,7 @@ import {
   type Level,
 } from "../lib/seatTypes";
 
-// ---------- CORE DATA LAYER (UNTOUCHED) ----------
+// ---------- CORE DATA LAYER (PRESERVED) ----------
 type RawCutoff = [number, number, number, number];
 type RawCourse = [number, RawCutoff[]];
 type RawCollege = { code: string; name: string; status: string; courses: RawCourse[] };
@@ -54,17 +55,16 @@ const FLAT: FlatRow[] = (() => {
 const BRANCH_LIST = DATA.branches.map((name, idx) => ({ idx, name })).sort((a, b) => a.name.localeCompare(b.name));
 const SEAT_INDEX = new Map<string, number>(DATA.seatTypes.map((s, i) => [s, i]));
 
-
-// ---------- PREMIUM UI ATOMS ----------
+// ---------- 3D & UI ATOMS ----------
 
 function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode; }) {
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 border ${
+      className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 border flex-1 text-center ${
         active
-          ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.15)]"
-          : "bg-[#0A0A0A] border-[#222] text-[#888] hover:border-[#444] hover:text-white"
+          ? "bg-gradient-to-br from-cyan-400 to-blue-600 text-white border-transparent shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+          : "bg-[#111] border-[#222] text-[#888] hover:border-[#444] hover:text-white"
       }`}
     >
       {children}
@@ -76,10 +76,10 @@ function StatusBadge({ status }: { status: string }) {
   const isGovt = status.startsWith("Government") && !status.includes("Aided");
   return (
     <span
-      className={`px-2.5 py-1 text-[10px] font-bold tracking-widest rounded-md uppercase border ${
+      className={`px-2 py-1 text-[9px] font-black tracking-widest rounded uppercase border ${
         isGovt 
-          ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" 
-          : "bg-[#111] border-[#222] text-[#888]"
+          ? "bg-cyan-500/10 border-cyan-500/40 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]" 
+          : "bg-[#1A1A1A] border-[#333] text-[#888]"
       }`}
     >
       {status}
@@ -89,53 +89,96 @@ function StatusBadge({ status }: { status: string }) {
 
 function MarginBar({ merit, cutoff }: { merit: number; cutoff: number }) {
   const margin = merit - cutoff;
-  const safe = margin >= 5;
-  const tight = margin >= 0 && margin < 5;
-  const color = safe ? "#10b981" : tight ? "#f59e0b" : "#64748b"; // Tailwind Emerald, Amber, Slate
+  const color = margin >= 5 ? "#00F0FF" : margin >= 0 ? "#7C3AED" : "#444"; 
   const pct = Math.max(4, Math.min(100, (cutoff / 100) * 100));
   
   return (
-    <div className="flex flex-col gap-1.5 min-w-[120px] text-right">
-      <div className="flex items-center justify-end gap-2">
-         <span className="text-xs font-bold tabular-nums" style={{ color: margin >= 0 ? color : '#64748b' }}>
-          {margin >= 0 ? '+' : ''}{margin.toFixed(2)}% margin
+    <div className="flex flex-col gap-1 w-full max-w-[140px]">
+      <div className="flex items-center justify-between">
+         <span className="text-[10px] font-mono text-[#666] uppercase">Delta</span>
+         <span className="text-xs font-black tabular-nums" style={{ color: margin >= 0 ? color : '#666' }}>
+          {margin >= 0 ? '+' : ''}{margin.toFixed(2)}%
         </span>
       </div>
-      <div className="relative w-full h-1.5 rounded-full bg-[#1A1A1A] overflow-hidden">
-        <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out" style={{ width: `${pct}%`, backgroundColor: color }} />
+      <div className="relative w-full h-1.5 rounded-full bg-[#111] border border-[#222] overflow-hidden">
+        <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-700 shadow-[0_0_10px_currentColor]" style={{ width: `${pct}%`, backgroundColor: color, color: color }} />
       </div>
     </div>
   );
 }
 
-// THE NEW LOADING ANIMATION: Industry-Standard Skeleton Shimmer
-function SkeletonCard() {
+// 3D CSS LOADER
+function Loader3D() {
   return (
-    <div className="flex flex-col md:flex-row md:items-center gap-4 bg-[#0A0A0A] border border-[#1A1A1A] rounded-2xl p-5 relative overflow-hidden">
-      {/* Shimmer effect overlay */}
-      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-      
-      <div className="flex-1 space-y-3 relative z-10">
-        <div className="flex gap-2">
-          <div className="h-5 w-24 bg-[#1A1A1A] rounded-md animate-pulse" />
-          <div className="h-5 w-16 bg-[#1A1A1A] rounded-md animate-pulse" />
+    <div className="flex flex-col items-center justify-center py-32 space-y-8 animate-in fade-in">
+      <div className="perspective-[1000px] w-24 h-24">
+        <div className="w-full h-full relative preserve-3d animate-[spin3D_3s_linear_infinite]">
+          {/* 3D Cube Faces */}
+          <div className="absolute inset-0 border-2 border-cyan-400 bg-cyan-500/10 shadow-[0_0_30px_rgba(6,182,212,0.3)] translate-z-12 flex items-center justify-center"><Cpu size={32} className="text-cyan-400 opacity-50"/></div>
+          <div className="absolute inset-0 border-2 border-purple-500 bg-purple-500/10 -translate-z-12"></div>
+          <div className="absolute inset-0 border-2 border-blue-500 bg-blue-500/10 rotate-y-90 translate-x-12"></div>
+          <div className="absolute inset-0 border-2 border-blue-500 bg-blue-500/10 rotate-y-90 -translate-x-12"></div>
+          <div className="absolute inset-0 border-2 border-cyan-500 bg-cyan-500/10 rotate-x-90 -translate-y-12"></div>
+          <div className="absolute inset-0 border-2 border-cyan-500 bg-cyan-500/10 rotate-x-90 translate-y-12"></div>
         </div>
-        <div className="h-6 w-3/4 bg-[#222] rounded-lg animate-pulse" />
-        <div className="h-4 w-1/2 bg-[#1A1A1A] rounded-md animate-pulse" />
       </div>
-      <div className="flex items-center gap-6 mt-4 md:mt-0 relative z-10">
-        <div className="space-y-2 text-right">
-          <div className="h-3 w-16 bg-[#1A1A1A] rounded-md ml-auto animate-pulse" />
-          <div className="h-6 w-24 bg-[#222] rounded-md animate-pulse" />
+      <p className="text-cyan-400 font-mono text-sm tracking-[0.3em] uppercase animate-pulse">Computing Spatial Matrices</p>
+    </div>
+  );
+}
+
+// 3D SPATIAL TUTORIAL
+function SpatialTutorial({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050505]/80 backdrop-blur-xl animate-in fade-in duration-500">
+      <div className="relative w-full max-w-5xl px-8 flex flex-col items-center">
+        
+        <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-12 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] text-center">
+          SYSTEM <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">ONBOARDING</span>
+        </h2>
+
+        {/* 3D Floating Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 perspective-[2000px] w-full mb-16">
+          
+          <div className="bg-gradient-to-b from-[#111] to-[#0A0A0A] border border-[#222] p-8 rounded-3xl transform-gpu rotate-y-[15deg] rotate-x-[10deg] hover:rotate-y-0 hover:rotate-x-0 transition-all duration-500 shadow-[-20px_20px_30px_rgba(0,0,0,0.5)]">
+            <div className="w-12 h-12 bg-cyan-500/20 rounded-2xl border border-cyan-500/40 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+              <SlidersHorizontal className="text-cyan-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Configure Parameters</h3>
+            <p className="text-[#888] text-sm">Input your merit percentage into the high-density sidebar grid to calibrate the engine.</p>
+          </div>
+
+          <div className="bg-gradient-to-b from-[#111] to-[#0A0A0A] border border-[#222] p-8 rounded-3xl transform-gpu hover:-translate-y-4 transition-all duration-500 shadow-[0_20px_30px_rgba(0,0,0,0.5)] relative z-10">
+            <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent rounded-3xl pointer-events-none" />
+            <div className="w-12 h-12 bg-purple-500/20 rounded-2xl border border-purple-500/40 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
+              <Layers className="text-purple-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Analyze Spatial Data</h3>
+            <p className="text-[#888] text-sm">Review the computed matrix. The system automatically calculates delta margins for every branch.</p>
+          </div>
+
+          <div className="bg-gradient-to-b from-[#111] to-[#0A0A0A] border border-[#222] p-8 rounded-3xl transform-gpu -rotate-y-[15deg] rotate-x-[10deg] hover:rotate-y-0 hover:rotate-x-0 transition-all duration-500 shadow-[20px_20px_30px_rgba(0,0,0,0.5)]">
+            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl border border-blue-500/40 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+              <Star className="text-blue-400 fill-blue-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Stage Option Form</h3>
+            <p className="text-[#888] text-sm">Select branches to instantly generate a printable, shareable DTE Option Form sequence.</p>
+          </div>
+
         </div>
-        <div className="h-10 w-10 bg-[#1A1A1A] rounded-xl animate-pulse" />
+
+        <button 
+          onClick={onClose}
+          className="px-12 py-4 bg-white text-black font-black text-sm uppercase tracking-[0.2em] rounded-full hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.3)]"
+        >
+          Initialize Workspace
+        </button>
       </div>
     </div>
   );
 }
 
-
-// ---------- MATCH MODE ----------
+// ---------- MATCH MODE (WIDE DASHBOARD GRID) ----------
 
 function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; toggleShortlist: (key: string) => void; }) {
   const [merit, setMerit] = useState<string>("");
@@ -146,20 +189,16 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
   const [round, setRound] = useState(1);
   const [branchFilter, setBranchFilter] = useState<Set<number>>(new Set());
   const [branchQuery, setBranchQuery] = useState("");
-  const [visibleCount, setVisibleCount] = useState(50);
-  
-  // Clean Loading State
   const [isCalculating, setIsCalculating] = useState(false);
 
   const isSpecialCategory = ["EWS", "TFWS", "DEFOPENS", "ORPHAN", "PWDOPENH"].includes(category);
   const meritNum = parseFloat(merit);
   const hasValidMerit = merit.trim() !== "" && !isNaN(meritNum) && meritNum >= 0 && meritNum <= 100;
 
-  // Trigger loading animation on parameter change
   useEffect(() => {
     if (hasValidMerit) {
       setIsCalculating(true);
-      const timer = setTimeout(() => setIsCalculating(false), 600);
+      const timer = setTimeout(() => setIsCalculating(false), 800);
       return () => clearTimeout(timer);
     }
   }, [merit, category, candidature, gender, level, round, branchFilter, hasValidMerit]);
@@ -183,240 +222,145 @@ function MatchMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; tog
     return Array.from(best.values()).sort((a, b) => b.merit - a.merit);
   }, [hasValidMerit, meritNum, category, candidature, gender, level, round, branchFilter]);
 
-  useEffect(() => setVisibleCount(50), [results]);
-
-  const filteredBranchList = branchQuery
-    ? BRANCH_LIST.filter((b) => b.name.toLowerCase().includes(branchQuery.toLowerCase()))
-    : BRANCH_LIST;
+  const filteredBranchList = branchQuery ? BRANCH_LIST.filter((b) => b.name.toLowerCase().includes(branchQuery.toLowerCase())) : BRANCH_LIST;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 animate-in fade-in duration-500">
       
-      {/* PARAMETER PANEL */}
-      <div className="bg-[#050505] border border-[#1A1A1A] rounded-3xl p-6 md:p-8 space-y-8">
-        
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-1">
-            <label className="block text-xs font-bold tracking-widest text-[#888] mb-3 uppercase">Merit Percentage</label>
-            <input
-              type="number"
-              inputMode="decimal"
-              min={0} max={100} step={0.01}
-              placeholder="e.g. 82.40"
-              value={merit}
-              onChange={(e) => setMerit(e.target.value)}
-              className="w-full md:w-72 bg-[#0A0A0A] border border-[#222] rounded-2xl px-5 py-4 text-2xl font-bold tabular-nums text-white placeholder:text-[#444] focus:border-white focus:ring-1 focus:ring-white outline-none transition-all"
-            />
-          </div>
-
-          <div className="flex-1 md:max-w-xs">
-            <label className="block text-xs font-bold tracking-widest text-[#888] mb-3 uppercase">Category</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-5 py-4 bg-[#0A0A0A] border border-[#222] rounded-2xl text-base font-semibold text-white focus:border-white focus:ring-1 focus:ring-white outline-none transition-all appearance-none"
-            >
-              {CATEGORY_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {!isSpecialCategory && (
-          <div className="flex flex-wrap gap-8 pt-6 border-t border-[#111]">
-            <div>
-              <div className="text-[10px] font-bold tracking-widest text-[#666] mb-3 uppercase">Candidature</div>
-              <div className="flex flex-wrap gap-2">
-                {CANDIDATURE_OPTIONS.map((o) => (
-                  <Pill key={o.value} active={candidature === o.value} onClick={() => setCandidature(o.value)}>{o.label}</Pill>
-                ))}
-              </div>
-            </div>
-            <div>
-              <div className="text-[10px] font-bold tracking-widest text-[#666] mb-3 uppercase">Gender</div>
-              <div className="flex gap-2">
-                {GENDER_OPTIONS.map((o) => (
-                  <Pill key={o.value} active={gender === o.value} onClick={() => setGender(o.value)}>{o.label}</Pill>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex flex-wrap gap-8 pt-6 border-t border-[#111]">
-          {!isSpecialCategory && (
-            <div>
-              <div className="text-[10px] font-bold tracking-widest text-[#666] mb-3 uppercase">Seat Level</div>
-              <div className="flex gap-2">
-                {LEVEL_OPTIONS.map((o) => (
-                  <Pill key={o.value} active={level === o.value} onClick={() => setLevel(o.value)}>{o.label}</Pill>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* LEFT SIDEBAR: STICKY PARAMETER DASHBOARD */}
+      <div className="xl:col-span-4 space-y-6">
+        <div className="sticky top-8 bg-[#050505] border border-[#1A1A1A] rounded-[32px] p-6 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-purple-500 to-transparent" />
           
-          <div>
-            <div className="text-[10px] font-bold tracking-widest text-[#666] mb-3 uppercase">CAP Round Filter</div>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4].map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRound(r)}
-                  className={`w-12 h-12 rounded-xl text-sm font-bold transition-all border ${
-                    round === r
-                      ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]"
-                      : "bg-[#0A0A0A] border-[#222] text-[#888] hover:border-[#444] hover:text-white"
-                  }`}
-                >
-                  R{r}
-                </button>
-              ))}
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-white mb-6 flex items-center gap-2">
+            <Box size={16} className="text-cyan-400" /> Control Matrix
+          </h2>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-[10px] font-mono text-[#888] mb-2 uppercase tracking-widest">Merit Value</label>
+              <input
+                type="number" step="0.01" placeholder="82.40"
+                value={merit} onChange={(e) => setMerit(e.target.value)}
+                className="w-full bg-[#0A0A0A] border border-[#222] rounded-2xl px-5 py-4 text-3xl font-black tabular-nums text-white placeholder:text-[#333] focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] outline-none transition-all"
+              />
             </div>
+
+            <div>
+              <label className="block text-[10px] font-mono text-[#888] mb-2 uppercase tracking-widest">Category</label>
+              <select
+                value={category} onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-5 py-4 bg-[#0A0A0A] border border-[#222] rounded-2xl text-sm font-bold text-white focus:border-cyan-400 outline-none transition-all appearance-none"
+              >
+                {CATEGORY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+
+            {!isSpecialCategory && (
+              <div className="space-y-4 pt-4 border-t border-[#111]">
+                <div className="flex gap-2 w-full">{CANDIDATURE_OPTIONS.map((o) => <Pill key={o.value} active={candidature === o.value} onClick={() => setCandidature(o.value)}>{o.label}</Pill>)}</div>
+                <div className="flex gap-2 w-full">{GENDER_OPTIONS.map((o) => <Pill key={o.value} active={gender === o.value} onClick={() => setGender(o.value)}>{o.label}</Pill>)}</div>
+                <div className="flex gap-2 w-full">{LEVEL_OPTIONS.map((o) => <Pill key={o.value} active={level === o.value} onClick={() => setLevel(o.value)}>{o.label}</Pill>)}</div>
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-[#111]">
+              <label className="block text-[10px] font-mono text-[#888] mb-2 uppercase tracking-widest">CAP Round Sequence</label>
+              <div className="grid grid-cols-4 gap-2">
+                {[1, 2, 3, 4].map((r) => (
+                  <button key={r} onClick={() => setRound(r)} className={`py-3 rounded-xl text-sm font-black transition-all border ${round === r ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]" : "bg-[#0A0A0A] border-[#222] text-[#666] hover:text-white hover:border-[#444]"}`}>R{r}</button>
+                ))}
+              </div>
+            </div>
+
+            <details className="group pt-4 border-t border-[#111]">
+              <summary className="flex items-center justify-between text-[10px] font-mono font-bold text-[#888] uppercase tracking-widest cursor-pointer hover:text-white list-none transition-colors">
+                <span>Branch Filter {branchFilter.size > 0 && <span className="text-cyan-400 ml-1">({branchFilter.size})</span>}</span>
+                <ChevronDown className="h-4 w-4 group-open:rotate-180 transition-transform" />
+              </summary>
+              <div className="mt-4 p-4 bg-[#0A0A0A] border border-[#222] rounded-2xl space-y-3">
+                <input type="text" placeholder="Search..." value={branchQuery} onChange={(e) => setBranchQuery(e.target.value)} className="w-full px-3 py-2 bg-[#050505] border border-[#222] rounded-lg text-xs outline-none text-white focus:border-cyan-400 transition-colors" />
+                <div className="flex flex-col gap-1 max-h-40 overflow-y-auto custom-scrollbar pr-2">
+                  {filteredBranchList.map((b) => (
+                    <button key={b.idx} onClick={() => { const next = new Set(branchFilter); branchFilter.has(b.idx) ? next.delete(b.idx) : next.add(b.idx); setBranchFilter(next); }} className={`px-3 py-2 rounded-lg text-xs font-semibold text-left transition-colors ${branchFilter.has(b.idx) ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "text-[#888] hover:bg-[#111] hover:text-white"}`}>
+                      {b.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </details>
           </div>
         </div>
+      </div>
 
-        {/* EXACT ORIGINAL BRANCH FILTER LOGIC (RESTORED & STYLED) */}
-        <details className="group pt-6 border-t border-[#111]">
-          <summary className="flex items-center gap-2 text-sm font-bold text-[#888] cursor-pointer hover:text-white list-none transition-colors">
-            <SlidersHorizontal className="h-4 w-4" />
-            Filter by specific branch
-            {branchFilter.size > 0 && (
-              <span className="px-2.5 py-0.5 rounded-md bg-white text-black text-xs font-bold ml-2">
-                {branchFilter.size} Selected
-              </span>
-            )}
-            <ChevronDown className="h-4 w-4 ml-auto group-open:hidden" />
-            <ChevronUp className="h-4 w-4 ml-auto hidden group-open:block" />
-          </summary>
-          <div className="mt-4 p-5 bg-[#0A0A0A] border border-[#1A1A1A] rounded-2xl space-y-4">
-            <input
-              type="text"
-              placeholder="Search branches..."
-              value={branchQuery}
-              onChange={(e) => setBranchQuery(e.target.value)}
-              className="w-full px-4 py-3 bg-[#050505] border border-[#222] rounded-xl text-sm outline-none focus:border-white text-white placeholder:text-[#555] transition-colors"
-            />
-            <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-              {filteredBranchList.map((b) => {
-                const active = branchFilter.has(b.idx);
+      {/* RIGHT AREA: DATA MATRIX */}
+      <div className="xl:col-span-8">
+        {!hasValidMerit ? (
+          <div className="flex flex-col items-center justify-center h-full min-h-[400px] border border-dashed border-[#222] rounded-[32px] bg-[#050505]/50">
+            <Search className="h-10 w-10 text-[#333] mb-4" />
+            <p className="text-xl font-bold text-[#666]">Engine Awaiting Input</p>
+          </div>
+        ) : isCalculating ? (
+          <Loader3D />
+        ) : results.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full min-h-[400px] border border-dashed border-[#222] rounded-[32px] bg-[#050505]/50">
+            <p className="text-2xl font-black text-white">0 VECTORS MATCHED</p>
+            <p className="text-sm text-[#888] mt-2">Expand parameters to increase search radius.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between px-2 mb-6">
+              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#888]">
+                Displaying <span className="text-white font-black text-xs">{results.length}</span> Results
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {results.map((r) => {
+                const college = DATA.colleges[r.ci];
+                const key = `${r.ci}-${r.branch}-${r.round}-${r.seat}`;
+                const starred = shortlist.has(key);
+                
                 return (
-                  <button
-                    key={b.idx}
-                    onClick={() => {
-                      const next = new Set(branchFilter);
-                      active ? next.delete(b.idx) : next.add(b.idx);
-                      setBranchFilter(next);
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                      active
-                        ? "bg-white border-white text-black shadow-sm"
-                        : "bg-[#050505] border-[#222] text-[#888] hover:border-[#444] hover:text-white"
-                    }`}
-                  >
-                    {b.name}
-                  </button>
+                  <div key={key} className="group flex flex-col justify-between bg-[#080808] border border-[#1A1A1A] hover:border-[#333] rounded-2xl p-5 transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+                    
+                    <div className="mb-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <StatusBadge status={college.status} />
+                        <span className="text-[9px] font-mono text-[#666] uppercase bg-[#111] px-2 py-0.5 rounded">ID: {college.code}</span>
+                      </div>
+                      <h3 className="text-base font-bold text-white leading-tight group-hover:text-cyan-400 transition-colors mb-2 line-clamp-2">{college.name}</h3>
+                      <div className="text-xs font-semibold text-[#888] flex items-center gap-2">
+                        <GraduationCap size={14} className="text-purple-400" /> {DATA.branches[r.branch]}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-end justify-between pt-4 border-t border-[#111]">
+                      <MarginBar merit={meritNum} cutoff={r.merit} />
+                      
+                      <button
+                        onClick={() => toggleShortlist(key)}
+                        className={`p-3 rounded-xl border transition-all duration-300 ${
+                          starred 
+                            ? "bg-white border-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)] scale-105" 
+                            : "bg-[#0A0A0A] border-[#222] text-[#666] hover:border-[#444] hover:text-white"
+                        }`}
+                      >
+                        <Star size={16} className={starred ? "fill-current" : ""} />
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>
-            {branchFilter.size > 0 && (
-              <button onClick={() => setBranchFilter(new Set())} className="text-xs font-semibold text-[#666] hover:text-white flex items-center gap-1 pt-2">
-                <X className="h-3 w-3" /> Clear selections
-              </button>
-            )}
           </div>
-        </details>
+        )}
       </div>
-
-      {/* ENGINE RESULTS */}
-      {!hasValidMerit ? (
-        <div className="text-center py-24 px-4 bg-[#050505] border border-[#1A1A1A] rounded-3xl">
-          <div className="w-16 h-16 bg-[#0A0A0A] border border-[#222] rounded-full flex items-center justify-center mx-auto mb-4">
-             <Search className="h-6 w-6 text-[#666]" />
-          </div>
-          <h3 className="text-xl font-bold text-white mb-2">Awaiting Parameters</h3>
-          <p className="text-sm text-[#888] max-w-sm mx-auto">Enter your precise merit percentage to unlock matching polytechnic institutions.</p>
-        </div>
-      ) : isCalculating ? (
-        <div className="space-y-4">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
-      ) : results.length === 0 ? (
-        <div className="text-center py-24 px-4 bg-[#050505] border border-dashed border-[#222] rounded-3xl">
-          <h3 className="text-xl font-bold text-white mb-2">Zero Matches Identified</h3>
-          <p className="text-sm text-[#888]">Adjust your category, seat level, or CAP round to expand the search radius.</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between text-sm font-semibold text-[#666] px-2">
-            <span><span className="text-white font-bold">{results.length}</span> eligible branches found</span>
-            <span className="bg-[#111] border border-[#222] px-3 py-1 rounded-full text-[10px] tracking-widest uppercase text-[#888]">Ranked by Match Fit</span>
-          </div>
-          
-          <div className="space-y-3">
-            {results.slice(0, visibleCount).map((r) => {
-              const college = DATA.colleges[r.ci];
-              const branchName = DATA.branches[r.branch];
-              const key = `${r.ci}-${r.branch}-${r.round}-${r.seat}`;
-              const starred = shortlist.has(key);
-              
-              return (
-                <div
-                  key={key}
-                  className="group flex flex-col md:flex-row md:items-center gap-4 bg-[#0A0A0A] border border-[#1A1A1A] hover:border-[#333] rounded-2xl p-5 transition-all duration-200"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2.5">
-                      <StatusBadge status={college.status} />
-                      <span className="text-[10px] font-bold text-[#666] uppercase tracking-widest bg-[#111] px-2 py-0.5 rounded border border-[#222]">Code: {college.code}</span>
-                    </div>
-                    <h3 className="text-lg font-bold text-white leading-tight group-hover:text-cyan-400 transition-colors">{college.name}</h3>
-                    <div className="text-sm font-medium text-[#888] flex items-center gap-2 mt-2">
-                      <GraduationCap className="h-4 w-4 text-[#555]" /> {branchName}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between md:justify-end gap-6 pt-4 md:pt-0 border-t border-[#111] md:border-none mt-2 md:mt-0">
-                    <div className="text-right flex flex-col items-end">
-                      <span className="text-[10px] font-bold text-[#666] uppercase tracking-widest mb-1">Historical Cutoff</span>
-                      <span className="text-lg font-black text-white tabular-nums leading-none mb-2">{r.merit.toFixed(2)}%</span>
-                      <MarginBar merit={meritNum} cutoff={r.merit} />
-                    </div>
-
-                    <button
-                      onClick={() => toggleShortlist(key)}
-                      className={`shrink-0 p-3.5 rounded-xl border transition-all duration-200 ${
-                        starred 
-                          ? "bg-white border-white text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]" 
-                          : "bg-[#111] border-[#222] text-[#666] hover:border-[#444] hover:text-white"
-                      }`}
-                      aria-label="Add to Option Form"
-                    >
-                      <Star className={`h-5 w-5 ${starred ? "fill-current" : ""}`} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          
-          {visibleCount < results.length && (
-            <button
-              onClick={() => setVisibleCount((v) => v + 50)}
-              className="w-full py-4 rounded-2xl bg-[#050505] border border-[#1A1A1A] text-[#888] hover:bg-[#0A0A0A] hover:text-white transition-colors text-sm font-bold flex items-center justify-center gap-2 mt-6"
-            >
-              Load Additional Options <ArrowRight className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 }
 
-// ---------- DIRECTORY MODE ----------
+// ---------- DIRECTORY MODE (DENSE GRID) ----------
 
 function BrowseMode({ expandedCourse, setExpandedCourse }: { expandedCourse: string | null; setExpandedCourse: (val: string | null) => void; }) {
   const [query, setQuery] = useState("");
@@ -428,104 +372,68 @@ function BrowseMode({ expandedCourse, setExpandedCourse }: { expandedCourse: str
   }, [query]);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="bg-[#050505] border border-[#1A1A1A] rounded-3xl p-4">
-        <div className="relative">
-          <Search className="absolute left-4 top-3.5 h-5 w-5 text-[#666]" />
-          <input
-            type="text"
-            placeholder="Search institute by name or code..."
-            className="w-full pl-12 pr-4 py-3 bg-[#0A0A0A] border border-[#222] rounded-2xl focus:border-white outline-none transition-all text-white placeholder:text-[#555] text-sm"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="w-full max-w-2xl bg-[#050505] border border-[#1A1A1A] rounded-[24px] p-3 shadow-2xl relative">
+        <Search className="absolute left-6 top-6 h-5 w-5 text-[#666]" />
+        <input
+          type="text" placeholder="Query full database by institute or code..." value={query} onChange={(e) => setQuery(e.target.value)}
+          className="w-full pl-12 pr-4 py-3 bg-[#0A0A0A] border border-[#222] rounded-xl outline-none text-white focus:border-cyan-400 text-sm font-mono transition-colors"
+        />
       </div>
 
-      {!query.trim() && (
-        <div className="text-[10px] font-bold text-[#666] px-2 uppercase tracking-widest">Showing first 30 of {DATA.colleges.length} institutes</div>
-      )}
-
-      <div className="space-y-4">
-        {filtered.length === 0 ? (
-          <div className="text-center text-[#666] py-16 text-sm bg-[#050505] border border-dashed border-[#222] rounded-3xl">No institutes found matching your query.</div>
-        ) : (
-          filtered.map((college) => (
-            <div key={college.code} className="bg-[#050505] rounded-3xl border border-[#1A1A1A] overflow-hidden hover:border-[#333] transition-colors">
-              
-              <div className="p-6 md:p-8 flex flex-col gap-3 border-b border-[#111]">
-                <div className="flex items-center gap-3">
-                  <span className="px-2 py-1 text-[10px] font-bold tracking-widest uppercase bg-[#111] border border-[#222] text-[#888] rounded-md">
-                    CODE: {college.code}
-                  </span>
-                  <StatusBadge status={college.status} />
-                </div>
-                <h2 className="text-xl font-bold flex items-center gap-3 text-white">
-                  <Building2 className="h-5 w-5 text-cyan-400" /> {college.name}
-                </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {filtered.map((college) => (
+          <div key={college.code} className="bg-[#050505] rounded-3xl border border-[#1A1A1A] overflow-hidden hover:border-[#333] transition-colors flex flex-col">
+            <div className="p-6 border-b border-[#111] flex-1">
+              <div className="flex items-center justify-between mb-4">
+                <StatusBadge status={college.status} />
+                <span className="text-[10px] font-mono font-bold text-[#666]">#{college.code}</span>
               </div>
-
-              {/* EXACT ORIGINAL ACCORDION LOGIC RESTORED & STYLED */}
-              <div className="p-4 space-y-2 bg-[#0A0A0A]">
-                {college.courses.map(([branchIdx, cutoffs], idx) => {
-                  const courseId = `${college.code}-${idx}`;
-                  const branchName = DATA.branches[branchIdx];
-                  const isOpen = expandedCourse === courseId;
-                  
-                  return (
-                    <div key={courseId} className="bg-[#050505] border border-[#1A1A1A] rounded-2xl overflow-hidden transition-all">
-                      <button
-                        onClick={() => setExpandedCourse(isOpen ? null : courseId)}
-                        className="w-full flex items-center justify-between p-5 hover:bg-[#111] transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <GraduationCap className="h-5 w-5 text-[#666]" />
-                          <span className="font-bold text-left text-white">{branchName}</span>
-                        </div>
-                        {isOpen ? <ChevronUp className="h-5 w-5 text-[#666]" /> : <ChevronDown className="h-5 w-5 text-[#666]" />}
-                      </button>
-
-                      {isOpen && (
-                        <div className="border-t border-[#1A1A1A] overflow-x-auto">
-                          <table className="w-full text-sm text-left">
-                            <thead className="text-[10px] uppercase tracking-widest text-[#666] bg-[#0A0A0A]">
-                              <tr>
-                                <th className="px-5 py-4 font-bold">Round</th>
-                                <th className="px-5 py-4 font-bold">Seat Type</th>
-                                <th className="px-5 py-4 font-bold text-right">Cutoff</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[#1A1A1A]">
-                              {cutoffs.slice().sort((a, b) => a[0] - b[0] || b[3] - a[3]).map(([round, seatIdx, stageIdx, merit], cIdx) => {
-                                const decoded = decodeSeat(DATA.seatTypes[seatIdx]);
-                                return (
-                                  <tr key={cIdx} className="hover:bg-[#111] transition-colors">
-                                    <td className="px-5 py-4 font-bold text-white">R{round}</td>
-                                    <td className="px-5 py-4">
-                                      <span title={decoded.code} className="text-[#CCC] font-semibold cursor-help">{decoded.label}</span>
-                                      <span className="block text-[10px] text-[#666] mt-1">{DATA.stages[stageIdx]}</span>
-                                    </td>
-                                    <td className="px-5 py-4 font-black text-right text-cyan-400 tabular-nums">{merit.toFixed(2)}%</td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              <h2 className="text-lg font-bold text-white line-clamp-2">{college.name}</h2>
             </div>
-          ))
-        )}
+
+            <div className="p-3 bg-[#0A0A0A] space-y-2">
+              {college.courses.map(([branchIdx, cutoffs], idx) => {
+                const courseId = `${college.code}-${idx}`;
+                const branchName = DATA.branches[branchIdx];
+                const isOpen = expandedCourse === courseId;
+                
+                return (
+                  <div key={courseId} className="bg-[#050505] border border-[#1A1A1A] rounded-2xl overflow-hidden transition-all">
+                    <button onClick={() => setExpandedCourse(isOpen ? null : courseId)} className="w-full flex items-center justify-between p-4 hover:bg-[#111] transition-colors">
+                      <span className="font-bold text-xs text-left text-slate-300 pr-4">{branchName}</span>
+                      {isOpen ? <ChevronUp size={14} className="text-cyan-400 shrink-0" /> : <ChevronDown size={14} className="text-[#666] shrink-0" />}
+                    </button>
+                    {isOpen && (
+                      <div className="border-t border-[#111] overflow-x-auto bg-[#030303]">
+                        <table className="w-full text-xs text-left">
+                          <thead className="text-[9px] uppercase tracking-widest text-[#666]">
+                            <tr><th className="px-4 py-3">Rnd</th><th className="px-4 py-3">Type</th><th className="px-4 py-3 text-right">Cutoff</th></tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#111]">
+                            {cutoffs.slice().sort((a, b) => a[0] - b[0] || b[3] - a[3]).map(([round, seatIdx, stageIdx, merit], cIdx) => (
+                              <tr key={cIdx} className="hover:bg-[#111]">
+                                <td className="px-4 py-3 font-bold text-white">R{round}</td>
+                                <td className="px-4 py-3"><span title={decodeSeat(DATA.seatTypes[seatIdx]).code} className="text-[#CCC] cursor-help">{decodeSeat(DATA.seatTypes[seatIdx]).label}</span></td>
+                                <td className="px-4 py-3 font-black text-right text-cyan-400 tabular-nums">{merit.toFixed(2)}%</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-// ---------- OPTION FORM MODE ----------
+// ---------- OPTION FORM ----------
 
 function OptionFormMode({ shortlist, toggleShortlist }: { shortlist: Set<string>; toggleShortlist: (key: string) => void; }) {
   const [copied, setCopied] = useState(false);
@@ -533,10 +441,7 @@ function OptionFormMode({ shortlist, toggleShortlist }: { shortlist: Set<string>
   const handleShare = () => {
     if (shortlist.size === 0) return;
     const url = `${window.location.origin}${window.location.pathname}?list=${Array.from(shortlist).join(',')}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
   };
 
   const rows = Array.from(shortlist).map(key => {
@@ -546,71 +451,40 @@ function OptionFormMode({ shortlist, toggleShortlist }: { shortlist: Set<string>
   });
 
   return (
-    <div className="animate-in fade-in duration-500">
-      
-      <div className="hidden print:block mb-8 border-b-2 border-black pb-4">
-        <h1 className="text-3xl font-bold text-black">DTE Option Form Choices</h1>
-        <p className="text-sm font-medium text-slate-500 mt-1">Generated via MahaPoly</p>
-      </div>
-
-      <div className="bg-[#050505] border border-[#1A1A1A] rounded-3xl p-6 md:p-8 print:bg-transparent print:border-none print:p-0">
-        
+    <div className="animate-in fade-in duration-500 w-full max-w-5xl mx-auto">
+      <div className="hidden print:block mb-8 border-b-4 border-black pb-4"><h1 className="text-4xl font-black text-black">DTE Option Form</h1><p className="text-sm font-bold text-gray-500">MahaPoly Generated</p></div>
+      <div className="bg-[#050505] border border-[#1A1A1A] rounded-[32px] p-6 md:p-10 print:bg-transparent print:border-none print:p-0">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8 print:hidden">
-          <div>
-            <h2 className="text-2xl font-bold text-white">Staged Option Form</h2>
-            <p className="text-sm text-[#888] mt-1">Review and order your selected branches before official submission.</p>
-          </div>
-
+          <div><h2 className="text-3xl font-black text-white">Staged Options</h2><p className="text-sm text-[#888] mt-1">Review selection sequence prior to DTE portal execution.</p></div>
           <div className="flex gap-3 w-full sm:w-auto">
-            <button
-              onClick={handleShare}
-              disabled={shortlist.size === 0}
-              className="flex-1 sm:flex-none px-5 py-2.5 bg-[#111] border border-[#222] hover:bg-[#1A1A1A] text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-            >
-              {copied ? <Check size={18} className="text-emerald-500" /> : <Share2 size={18} />} Share List
+            <button onClick={handleShare} disabled={shortlist.size === 0} className="flex-1 sm:flex-none px-6 py-3 bg-[#111] hover:bg-[#222] border border-[#333] text-white text-xs font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50">
+              {copied ? <Check size={16} className="text-cyan-400" /> : <Share2 size={16} />} Share
             </button>
-            <button
-              onClick={() => window.print()}
-              disabled={shortlist.size === 0}
-              className="flex-1 sm:flex-none px-5 py-2.5 bg-white text-black hover:bg-gray-200 font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(255,255,255,0.2)]"
-            >
-              <Printer size={18} /> Print Form
+            <button onClick={() => window.print()} disabled={shortlist.size === 0} className="flex-1 sm:flex-none px-6 py-3 bg-white text-black hover:bg-gray-200 text-xs font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+              <Printer size={16} /> Print
             </button>
           </div>
         </div>
-
         {shortlist.size === 0 ? (
-          <div className="py-20 text-center border border-dashed border-[#222] rounded-2xl bg-[#0A0A0A]">
-            <Star className="h-8 w-8 text-[#444] mx-auto mb-3" />
-            <p className="text-lg font-bold text-[#888] mb-1">Your list is empty</p>
-            <p className="text-sm text-[#666]">Return to the engine and click the star icon to stage your choices here.</p>
+          <div className="py-24 text-center border border-dashed border-[#222] rounded-2xl bg-[#0A0A0A]">
+            <Star className="h-10 w-10 text-[#444] mx-auto mb-4" />
+            <p className="text-xl font-bold text-[#888]">No choices staged.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-[#1A1A1A] print:border-slate-400">
+          <div className="overflow-x-auto rounded-2xl border border-[#1A1A1A] print:border-gray-300">
             <table className="w-full text-left print:text-black">
-              <thead>
-                <tr className="bg-[#0A0A0A] border-b border-[#1A1A1A] text-[10px] tracking-widest uppercase font-bold text-[#666] print:bg-slate-100 print:border-slate-400 print:text-slate-800">
-                  <th className="px-5 py-4 text-center w-16">Pref</th>
-                  <th className="px-5 py-4 w-28">Code</th>
-                  <th className="px-5 py-4">Institution Name</th>
-                  <th className="px-5 py-4">Branch</th>
-                  <th className="px-5 py-4 text-right w-24">Cutoff</th>
-                  <th className="px-5 py-4 text-center w-16 print:hidden"></th>
-                </tr>
+              <thead className="bg-[#0A0A0A] border-b border-[#1A1A1A] text-[10px] uppercase tracking-widest font-bold text-[#666] print:bg-gray-100 print:text-black">
+                <tr><th className="px-6 py-5 text-center">Pref</th><th className="px-6 py-5">Code</th><th className="px-6 py-5">Institution</th><th className="px-6 py-5">Branch</th><th className="px-6 py-5 text-right">Cutoff</th><th className="px-6 py-5 print:hidden"></th></tr>
               </thead>
-              <tbody className="divide-y divide-[#1A1A1A] print:divide-slate-300">
+              <tbody className="divide-y divide-[#1A1A1A] print:divide-gray-300">
                 {rows.map((item, index) => (
                   <tr key={item.key} className="hover:bg-[#111] transition-colors print:bg-transparent">
-                    <td className="px-5 py-4 font-black text-white text-center print:text-slate-900">{index + 1}</td>
-                    <td className="px-5 py-4 font-mono font-medium text-[#888] print:text-slate-700">{item.code}</td>
-                    <td className="px-5 py-4 font-bold text-[#CCC] print:text-slate-900">{item.name}</td>
-                    <td className="px-5 py-4 font-medium text-[#888] print:text-slate-800">{item.branch}</td>
-                    <td className="px-5 py-4 font-bold text-right text-cyan-400 tabular-nums print:text-slate-900">{item.merit.toFixed(2)}%</td>
-                    <td className="px-5 py-4 text-center print:hidden">
-                      <button onClick={() => toggleShortlist(item.key)} className="text-[#666] hover:text-red-500 p-2 rounded-lg hover:bg-[#1A1A1A] transition-colors">
-                        <X size={18} />
-                      </button>
-                    </td>
+                    <td className="px-6 py-5 font-black text-xl text-center text-cyan-400 print:text-black">{index + 1}</td>
+                    <td className="px-6 py-5 font-mono text-sm text-[#888] print:text-gray-600">{item.code}</td>
+                    <td className="px-6 py-5 font-bold text-[#CCC] print:text-black">{item.name}</td>
+                    <td className="px-6 py-5 font-medium text-[#888] print:text-gray-800">{item.branch}</td>
+                    <td className="px-6 py-5 font-black text-right text-white text-lg tabular-nums print:text-black">{item.merit.toFixed(2)}%</td>
+                    <td className="px-6 py-5 text-center print:hidden"><button onClick={() => toggleShortlist(item.key)} className="text-[#666] hover:text-red-500 p-2 rounded-lg hover:bg-[#1A1A1A]"><X size={18} /></button></td>
                   </tr>
                 ))}
               </tbody>
@@ -622,87 +496,70 @@ function OptionFormMode({ shortlist, toggleShortlist }: { shortlist: Set<string>
   );
 }
 
-
-// ---------- ROOT SHELL ----------
+// ---------- ROOT LAYOUT (FULL WIDE GRID) ----------
 
 export default function PolytechnicDashboard() {
   const [mode, setMode] = useState<"match" | "browse" | "option-form">("match");
   const [shortlist, setShortlist] = useState<Set<string>>(new Set());
   const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     try {
       const savedList = localStorage.getItem("mahapoly-shortlist");
       if (savedList) setShortlist(new Set(JSON.parse(savedList)));
+      
+      const hasSeenTutorial = sessionStorage.getItem("mahapoly-tutorial-seen");
+      if (!hasSeenTutorial) setShowTutorial(true);
     } catch {}
   }, []);
 
-  const toggleShortlist = (key: string) => {
-    setShortlist((prev) => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
-      try { localStorage.setItem("mahapoly-shortlist", JSON.stringify(Array.from(next))); } catch {}
-      return next;
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-[#000000] text-white font-sans selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-[#000000] text-white font-sans selection:bg-cyan-500/30 overflow-x-hidden">
       
-      {/* ADDING ANIMATION KEYFRAMES GLOBALLY VIA TAILWIND ARBITRARY VALUES */}
+      {/* 3D CSS GLOBALS */}
       <style dangerouslySetInnerHTML={{__html: `
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
+        .preserve-3d { transform-style: preserve-3d; }
+        .translate-z-12 { transform: translateZ(48px); }
+        .-translate-z-12 { transform: translateZ(-48px); }
+        .rotate-y-90 { transform: rotateY(90deg); }
+        .rotate-x-90 { transform: rotateX(90deg); }
+        .translate-x-12 { transform: rotateY(90deg) translateZ(48px); }
+        .-translate-x-12 { transform: rotateY(90deg) translateZ(-48px); }
+        .translate-y-12 { transform: rotateX(90deg) translateZ(48px); }
+        .-translate-y-12 { transform: rotateX(90deg) translateZ(-48px); }
+        @keyframes spin3D {
+          0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+          100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(0deg); }
         }
       `}} />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 space-y-10 print:p-0">
+      {showTutorial && <SpatialTutorial onClose={() => { setShowTutorial(false); sessionStorage.setItem("mahapoly-tutorial-seen", "true"); }} />}
+
+      <div className="w-full max-w-[1600px] mx-auto px-4 md:px-8 xl:px-12 py-10 print:p-0">
         
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 print:hidden">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 text-[10px] font-bold tracking-widest text-[#888] uppercase">
-              <MapPin size={14} className="text-cyan-400" /> Maharashtra DTE Portal
-            </div>
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-8 border-b border-[#111] print:hidden">
+          <div className="space-y-2">
             <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white">
-              MahaPoly
+              MAHA<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">POLY</span>
             </h1>
-            <p className="text-[#888] text-sm font-medium max-w-md">
-              Intelligent cutoff aggregation across {DATA.colleges.length} state institutions.
+            <p className="text-[#666] text-sm font-medium">
+              Spatial Cutoff Engine // {DATA.colleges.length} Institutions Indexed
             </p>
           </div>
 
-          <div className="flex bg-[#0A0A0A] p-1.5 rounded-2xl w-fit border border-[#1A1A1A]">
-            <button
-              onClick={() => setMode("match")}
-              className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
-                mode === "match" ? "bg-[#1A1A1A] text-white shadow-sm" : "text-[#666] hover:text-white"
-              }`}
-            >
-              Engine
-            </button>
-            <button
-              onClick={() => setMode("browse")}
-              className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
-                mode === "browse" ? "bg-[#1A1A1A] text-white shadow-sm" : "text-[#666] hover:text-white"
-              }`}
-            >
-              Directory
-            </button>
-            <button
-              onClick={() => setMode("option-form")}
-              className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center gap-2 ${
-                mode === "option-form" ? "bg-[#1A1A1A] text-white shadow-sm" : "text-[#666] hover:text-white"
-              }`}
-            >
-              <Star size={16} className={shortlist.size > 0 ? "fill-current text-white" : ""} />
-              Staged {shortlist.size > 0 && <span className="bg-[#222] text-white px-1.5 py-0.5 rounded-md text-[10px] leading-none ml-1">{shortlist.size}</span>}
+          <div className="flex bg-[#050505] p-1.5 rounded-2xl border border-[#1A1A1A] w-full md:w-auto overflow-x-auto custom-scrollbar">
+            <button onClick={() => setMode("match")} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap ${mode === "match" ? "bg-white text-black shadow-sm" : "text-[#666] hover:text-white"}`}>Engine</button>
+            <button onClick={() => setMode("browse")} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap ${mode === "browse" ? "bg-white text-black shadow-sm" : "text-[#666] hover:text-white"}`}>Directory</button>
+            <button onClick={() => setMode("option-form")} className={`px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 whitespace-nowrap ${mode === "option-form" ? "bg-white text-black shadow-sm" : "text-[#666] hover:text-white"}`}>
+              <Star size={14} className={shortlist.size > 0 ? "fill-current" : ""} /> Form {shortlist.size > 0 && `(${shortlist.size})`}
             </button>
           </div>
         </header>
 
-        {mode === "match" && <MatchMode shortlist={shortlist} toggleShortlist={toggleShortlist} />}
+        {mode === "match" && <MatchMode shortlist={shortlist} toggleShortlist={(k) => setShortlist(p => { const n = new Set(p); n.has(k) ? n.delete(k) : n.add(k); localStorage.setItem("mahapoly-shortlist", JSON.stringify(Array.from(n))); return n; })} />}
         {mode === "browse" && <BrowseMode expandedCourse={expandedCourse} setExpandedCourse={setExpandedCourse} />}
-        {mode === "option-form" && <OptionFormMode shortlist={shortlist} toggleShortlist={toggleShortlist} />}
+        {mode === "option-form" && <OptionFormMode shortlist={shortlist} toggleShortlist={(k) => setShortlist(p => { const n = new Set(p); n.has(k) ? n.delete(k) : n.add(k); localStorage.setItem("mahapoly-shortlist", JSON.stringify(Array.from(n))); return n; })} />}
         
       </div>
     </div>
