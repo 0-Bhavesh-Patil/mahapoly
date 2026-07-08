@@ -32,15 +32,15 @@ export function TopNav() {
     pathname === href || (href === "/onboarding" && pathname.startsWith("/onboarding"));
 
   return (
-    <header className="sticky top-0 z-30 flex w-full flex-col items-center justify-center border-b border-black/[0.04] bg-white">
-      <div className="flex h-[74px] w-full max-w-[1280px] items-center justify-between px-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex w-full flex-col items-center justify-center border-b border-black/[0.05] bg-[#FFFFFFB0] backdrop-blur-[10px]">
+      <div className="flex w-full max-w-[1280px] items-center justify-between pt-3.5 pb-[15px] px-4 sm:px-6">
         
         {/* Left: Logo */}
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-[#dbeafe] bg-[#eff6ff] text-[#3b82f6]">
+        <Link href="/" className="flex shrink-0 items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-[#dbeafe] bg-[#eff6ff] text-blue-500">
             <GraduationCap className="h-5 w-5" strokeWidth={2.5} />
           </div>
-          <span className="text-[22px] font-bold leading-none tracking-tight text-[#111827]">
+          <span className="text-[#191B23] text-[28px] font-bold">
             MahaPoly
           </span>
         </Link>
@@ -48,7 +48,7 @@ export function TopNav() {
         {/* Center: Navigation Pill */}
         <nav
           aria-label="Primary navigation"
-          className="hidden md:flex h-11 items-center gap-1 rounded-full border border-black/[0.04] bg-[#f4f5f7] p-1"
+          className="hidden md:flex shrink-0 items-center bg-[#0000000D] p-[5px] rounded-[9999px] border border-solid border-[#0000000D]"
         >
           {links.map((l) => {
             const active = isActive(l.href);
@@ -57,10 +57,10 @@ export function TopNav() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex h-9 items-center justify-center rounded-full px-6 text-[14px] font-medium transition-all ${
+                className={`flex items-center justify-center rounded-[9999px] transition-all ${
                   active
-                    ? "bg-white text-[#111827] shadow-sm"
-                    : "text-[#6b7280] hover:text-[#111827]"
+                    ? "bg-white text-left py-1.5 px-[21px] mx-[2px] border border-solid border-[#0000000D] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[#191B23] text-sm"
+                    : "py-1.5 px-5 text-[#565E74] text-sm hover:text-[#191B23]"
                 }`}
               >
                 {l.label}
@@ -70,16 +70,18 @@ export function TopNav() {
         </nav>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-6">
-          <Link href="/" className="hidden text-[15px] font-medium text-[#4b5563] hover:text-[#111827] sm:block">
+        <div className="flex shrink-0 items-center gap-5">
+          <Link href="/" className="hidden text-sm text-[#565E74] hover:text-[#191B23] sm:block">
             Sign In
           </Link>
-          <Link
-            href="/onboarding"
-            className="inline-flex h-10 items-center justify-center rounded-full bg-[#3b82f6] px-6 text-[14px] font-medium text-white shadow-[0_0_20px_rgba(59,130,246,0.35)] transition-all hover:bg-[#2563eb] hover:shadow-[0_0_25px_rgba(59,130,246,0.45)]"
-          >
-            Get Started
-          </Link>
+          <div className="flex flex-col shrink-0 items-center bg-blue-500 pb-[1px] rounded-[9999px]">
+            <Link
+              href="/onboarding"
+              className="flex flex-col items-start bg-blue-500 text-left py-[7px] px-5 rounded-[9999px] shadow-[0px_0px_20px_rgba(59,130,246,0.3)] text-white text-sm transition-all hover:bg-blue-600"
+            >
+              Get Started
+            </Link>
+          </div>
         </div>
       </div>
     </header>
@@ -88,26 +90,26 @@ export function TopNav() {
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-black/[0.04] bg-[#f8f9fb] px-6 py-14">
-      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-5 text-center">
-        
-        {/* Brand Logo & Name */}
-        <Link href="/" className="flex items-center gap-2 text-[#4b5563]">
-          <GraduationCap className="h-5 w-5" />
-          <span className="text-base font-bold tracking-tight text-[#374151]">
-            MahaPoly
-          </span>
-        </Link>
+    <footer className="flex flex-col items-center self-stretch bg-[#F9F9FF] py-16 gap-8 border-t border-black/5">
+      {/* Brand Logo & Name */}
+      <Link href="/" className="flex items-center gap-[11px]">
+        <GraduationCap className="h-5 w-5 text-[#565E74]" />
+        <span className="text-[#565E74] text-lg font-bold">
+          MahaPoly
+        </span>
+      </Link>
 
-        {/* Disclaimer & Copyright */}
-        <div className="max-w-2xl space-y-6">
-          <p className="text-[13px] leading-relaxed text-[#9ca3af]">
-            Disclaimer: MahaPoly is an independent predictive tool based on historical CAP data. It is not affiliated
-            with the DTE Maharashtra. Predictions do not guarantee admission.
+      {/* Disclaimer & Copyright */}
+      <div className="flex flex-col items-center self-stretch mx-6">
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-[#565E74] text-xs text-center max-w-[626px]">
+            Disclaimer: MahaPoly is an independent predictive tool based on historical CAP data. It is not affiliated with the DTE Maharashtra. Predictions do not guarantee admission.
           </p>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#9ca3af]">
-            © 2024 Mahapoly. All rights reserved.
-          </p>
+          <div className="flex flex-col items-start">
+            <span className="text-[#565E74] text-xs">
+              © 2024 MAHAPOLY. ALL RIGHTS RESERVED.
+            </span>
+          </div>
         </div>
       </div>
     </footer>
