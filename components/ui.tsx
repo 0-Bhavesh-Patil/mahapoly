@@ -32,15 +32,15 @@ export function TopNav() {
     pathname === href || (href === "/onboarding" && pathname.startsWith("/onboarding"));
 
   return (
-    <header className="sticky top-0 z-30 flex w-full flex-col items-center justify-center border-b border-black/[0.05] bg-[#FFFFFFB0] backdrop-blur-[10px]">
-      <div className="flex w-full max-w-[1280px] items-center justify-between pt-3.5 pb-[15px] px-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex w-full flex-col items-center justify-center bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <div className="flex w-full max-w-[1280px] items-center justify-between py-4 px-6">
         
         {/* Left: Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-[#dbeafe] bg-[#eff6ff] text-blue-500">
-            <GraduationCap className="h-5 w-5" strokeWidth={2.5} />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-500">
+            <GraduationCap className="h-6 w-6" strokeWidth={2} />
           </div>
-          <span className="text-[#191B23] text-[28px] font-bold">
+          <span className="text-gray-900 text-2xl font-bold tracking-tight">
             MahaPoly
           </span>
         </Link>
@@ -48,7 +48,7 @@ export function TopNav() {
         {/* Center: Navigation Pill */}
         <nav
           aria-label="Primary navigation"
-          className="hidden md:flex shrink-0 items-center bg-[#0000000D] p-[5px] rounded-[9999px] border border-solid border-[#0000000D]"
+          className="hidden md:flex shrink-0 items-center bg-gray-100/70 p-1 rounded-full border border-gray-200/50"
         >
           {links.map((l) => {
             const active = isActive(l.href);
@@ -57,10 +57,10 @@ export function TopNav() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center justify-center rounded-[9999px] transition-all ${
+                className={`flex items-center justify-center rounded-full transition-all duration-200 ease-in-out ${
                   active
-                    ? "bg-white text-left py-1.5 px-[21px] mx-[2px] border border-solid border-[#0000000D] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-[#191B23] text-sm"
-                    : "py-1.5 px-5 text-[#565E74] text-sm hover:text-[#191B23]"
+                    ? "bg-white py-2 px-6 shadow-sm border border-gray-200/50 text-gray-900 font-medium text-sm"
+                    : "py-2 px-6 text-gray-500 font-medium text-sm hover:text-gray-900"
                 }`}
               >
                 {l.label}
@@ -70,18 +70,16 @@ export function TopNav() {
         </nav>
 
         {/* Right: Actions */}
-        <div className="flex shrink-0 items-center gap-5">
-          <Link href="/" className="hidden text-sm text-[#565E74] hover:text-[#191B23] sm:block">
+        <div className="flex shrink-0 items-center gap-6">
+          <Link href="/signin" className="hidden text-sm font-medium text-gray-600 hover:text-gray-900 sm:block transition-colors">
             Sign In
           </Link>
-          <div className="flex flex-col shrink-0 items-center bg-blue-500 pb-[1px] rounded-[9999px]">
-            <Link
-              href="/onboarding"
-              className="flex flex-col items-start bg-blue-500 text-left py-[7px] px-5 rounded-[9999px] shadow-[0px_0px_20px_rgba(59,130,246,0.3)] text-white text-sm transition-all hover:bg-blue-600"
-            >
-              Get Started
-            </Link>
-          </div>
+          <Link
+            href="/onboarding"
+            className="flex items-center justify-center bg-blue-500 py-2.5 px-6 rounded-full shadow-[0_0_24px_rgba(59,130,246,0.35)] text-white text-sm font-medium transition-all hover:bg-blue-600 hover:shadow-[0_0_28px_rgba(59,130,246,0.45)]"
+          >
+            Get Started
+          </Link>
         </div>
       </div>
     </header>
@@ -90,27 +88,29 @@ export function TopNav() {
 
 export function SiteFooter() {
   return (
-    <footer className="flex flex-col items-center self-stretch bg-[#F9F9FF] py-16 gap-8 border-t border-black/5">
-      {/* Brand Logo & Name */}
-      <Link href="/" className="flex items-center gap-[11px]">
-        <GraduationCap className="h-5 w-5 text-[#565E74]" />
-        <span className="text-[#565E74] text-lg font-bold">
-          MahaPoly
-        </span>
-      </Link>
+    <footer className="flex flex-col items-center justify-center w-full bg-[#F8F9FB] py-12 px-6 border-t border-gray-100">
+      <div className="flex flex-col items-center max-w-[800px] w-full gap-6">
+        
+        {/* Brand Logo & Name */}
+        <Link href="/" className="flex items-center gap-2">
+          <GraduationCap className="h-5 w-5 text-slate-500" strokeWidth={2.5} />
+          <span className="text-slate-700 text-[17px] font-bold tracking-tight">
+            MahaPoly
+          </span>
+        </Link>
 
-      {/* Disclaimer & Copyright */}
-      <div className="flex flex-col items-center self-stretch mx-6">
-        <div className="flex flex-col items-center gap-4">
-          <p className="text-[#565E74] text-xs text-center max-w-[626px]">
-            Disclaimer: MahaPoly is an independent predictive tool based on historical CAP data. It is not affiliated with the DTE Maharashtra. Predictions do not guarantee admission.
-          </p>
-          <div className="flex flex-col items-start">
-            <span className="text-[#565E74] text-xs">
-              © 2024 MAHAPOLY. ALL RIGHTS RESERVED.
-            </span>
-          </div>
-        </div>
+        {/* Disclaimer */}
+        <p className="text-slate-400 text-xs text-center leading-relaxed max-w-[650px]">
+          Disclaimer: MahaPoly is an independent predictive tool based on historical CAP data. It is not affiliated with the DTE
+          <br className="hidden sm:block" />
+          Maharashtra. Predictions do not guarantee admission.
+        </p>
+
+        {/* Copyright */}
+        <span className="text-slate-400 text-[11px] font-medium tracking-wider uppercase mt-2">
+          © 2024 MAHAPOLY. ALL RIGHTS RESERVED.
+        </span>
+        
       </div>
     </footer>
   );
