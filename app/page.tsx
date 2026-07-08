@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, GraduationCap, ListChecks, Target } from "lucide-react";
 import { DATA, FLAT } from "../lib/data";
-import { TopNav } from "../components/ui";
+import { SiteFooter, TopNav } from "../components/ui";
 
 const TICKER_ITEMS = [
   "418+ colleges mapped",
@@ -198,23 +198,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-white/70 backdrop-blur border-t border-black/[0.05] py-16 px-6">
-        <div className="max-w-[1280px] mx-auto flex flex-col items-center gap-8">
-          <div className="flex items-center gap-3">
-            <GraduationCap className="h-5 w-5 text-[#565e74] opacity-40" />
-            <span className="font-semibold text-lg text-[#565e74]">MahaPoly</span>
-          </div>
-          <div className="text-center max-w-xl space-y-2">
-            <p className="text-xs text-[#565e74]/70 leading-relaxed">
-              Disclaimer: MahaPoly is an independent tool built on historical DTE Maharashtra CAP cutoff data. It is
-              not affiliated with DTE Maharashtra. Predictions do not guarantee admission; always verify against
-              your official CAP login.
-            </p>
-            <p className="text-xs text-[#565e74]/60 tracking-widest uppercase">(c) 2026 MahaPoly.</p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
 
       <style jsx global>{`
         @keyframes scroll {

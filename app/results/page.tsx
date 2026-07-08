@@ -9,12 +9,11 @@ import {
   Sparkles,
   Star,
   MapPin,
-  GraduationCap,
   ShieldCheck,
   Scale,
   TrendingUp,
 } from "lucide-react";
-import { TopNav, CheckPill, BucketBadge, MarginBadge, CollegeTypeTag, bucketMeta } from "../../components/ui";
+import { TopNav, SiteFooter, CheckPill, BucketBadge, MarginBadge, CollegeTypeTag, bucketMeta } from "../../components/ui";
 import {
   DATA,
   BRANCH_LIST,
@@ -95,9 +94,9 @@ export default function ResultsPage() {
 
   if (profile === null) {
     return (
-      <div className="min-h-screen aurora-bg">
+      <div className="min-h-screen aurora-bg flex flex-col">
         <TopNav />
-        <div className="max-w-xl mx-auto text-center py-24 px-6">
+        <main className="max-w-xl mx-auto text-center py-24 px-6 flex-1">
           <Sparkles className="h-6 w-6 mx-auto mb-4 text-[#0058be]" />
           <h1 className="text-2xl font-semibold text-[#191b23] mb-2">Let's build your profile first</h1>
           <p className="text-[#424754] mb-6">
@@ -109,15 +108,16 @@ export default function ResultsPage() {
           >
             Start my profile
           </button>
-        </div>
+        </main>
+        <SiteFooter />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen aurora-bg">
+    <div className="min-h-screen aurora-bg flex flex-col">
       <TopNav />
-      <main className="max-w-[1280px] mx-auto px-4 md:px-6 py-8 md:py-10 space-y-8">
+      <main className="max-w-[1280px] mx-auto px-4 md:px-6 py-8 md:py-10 space-y-8 flex-1 w-full">
         {/* Summary header */}
         <div className="space-y-4 animate-rise-in">
           <div className="flex items-end justify-between flex-wrap gap-4">
@@ -307,6 +307,7 @@ export default function ResultsPage() {
           </div>
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }

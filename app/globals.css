@@ -154,6 +154,14 @@ body {
     transition: opacity 200ms ease;
   }
 
+  .hide-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   @media (hover: hover) and (pointer: fine) {
     .cursor-glow {
       opacity: 1;

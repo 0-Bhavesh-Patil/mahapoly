@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowDown, ArrowUp, MapPin, Plus, Printer, Share2, Trash2, GraduationCap, Info } from "lucide-react";
-import { TopNav, CollegeTypeTag } from "../../components/ui";
+import { TopNav, SiteFooter, CollegeTypeTag } from "../../components/ui";
 import { DATA, classifyCollegeType, guessLocation } from "../../lib/data";
 import { decodeSeat } from "../../lib/seatTypes";
 import { loadShortlist, saveShortlist, type ShortlistEntry } from "../../lib/shortlist";
@@ -67,12 +67,12 @@ export default function ShortlistPage() {
   if (!loaded) return null;
 
   return (
-    <div className="min-h-screen aurora-bg">
+    <div className="min-h-screen aurora-bg flex flex-col">
       <div className="no-print">
         <TopNav />
       </div>
 
-      <main className="max-w-[1280px] mx-auto px-4 md:px-8 py-8 md:py-10">
+      <main className="max-w-[1280px] mx-auto px-4 md:px-8 py-8 md:py-10 flex-1 w-full">
         <div className="no-print flex items-end justify-between flex-wrap gap-4 mb-8 animate-rise-in">
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-[#0f172a]">
@@ -260,6 +260,9 @@ export default function ShortlistPage() {
           .no-print { display: none !important; }
         }
       `}</style>
+      <div className="no-print">
+        <SiteFooter />
+      </div>
     </div>
   );
 }
