@@ -88,26 +88,24 @@ export function TopNav() {
 
 export function SiteFooter() {
   return (
-    <footer className="flex flex-col items-center justify-center w-full bg-[#F8F9FB] py-12 px-6 border-t border-gray-100">
-      <div className="flex flex-col items-center max-w-[800px] w-full gap-6">
+    <footer className="flex flex-col items-center justify-center w-full bg-white py-8 px-6 border-t border-gray-200">
+      <div className="flex flex-col items-center w-full gap-3">
         
         {/* Brand Logo & Name */}
         <Link href="/" className="flex items-center gap-2">
-          <GraduationCap className="h-5 w-5 text-slate-500" strokeWidth={2.5} />
-          <span className="text-slate-700 text-[17px] font-bold tracking-tight">
+          <GraduationCap className="h-5 w-5 text-gray-900" strokeWidth={2.5} />
+          <span className="text-gray-900 text-lg font-bold">
             MahaPoly
           </span>
         </Link>
 
         {/* Disclaimer */}
-        <p className="text-slate-400 text-xs text-center leading-relaxed max-w-[650px]">
-          Disclaimer: MahaPoly is an independent predictive tool based on historical CAP data. It is not affiliated with the DTE
-          <br className="hidden sm:block" />
-          Maharashtra. Predictions do not guarantee admission.
+        <p className="text-gray-800 text-[13px] sm:text-sm text-center">
+          Disclaimer: MahaPoly is an independent predictive tool based on historical CAP data. It is not affiliated with the DTEMaharashtra. Predictions do not guarantee admission.
         </p>
 
         {/* Copyright */}
-        <span className="text-slate-400 text-[11px] font-medium tracking-wider uppercase mt-2">
+        <span className="text-gray-800 text-[13px] sm:text-sm font-medium">
           © 2024 MAHAPOLY. ALL RIGHTS RESERVED.
         </span>
         
