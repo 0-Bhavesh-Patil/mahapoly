@@ -32,20 +32,20 @@ export function TopNav() {
     pathname === href || (href === "/onboarding" && pathname.startsWith("/onboarding"));
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[#eef1f6] bg-white">
-      <div className="grid min-h-[58px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-5">
+    <header className="sticky top-0 z-30 flex w-full flex-col items-start border-b border-black/[0.05] bg-white/70 backdrop-blur-[10px]">
+      <div className="mx-auto grid min-h-[74px] w-full max-w-[1280px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4">
         <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2.5 justify-self-start">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md border border-[#d9e5ff] bg-[#eef5ff] text-[#2f80ed]">
-            <GraduationCap className="h-3.5 w-3.5" />
+          <div className="flex h-8 w-8 items-center justify-center rounded border border-[#cfe0ff] bg-[#edf4ff] text-[#2f80ed]">
+            <GraduationCap className="h-4 w-4" />
           </div>
-          <span className="truncate text-[22px] font-bold tracking-tight text-[#101828]">
+          <span className="truncate text-[28px] font-bold leading-none tracking-[-0.01em] text-[#101828]">
             MahaPoly
           </span>
         </Link>
 
         <nav
           aria-label="Primary navigation"
-          className="hide-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-[#dfe3eb] bg-[#f0f1f4] p-1"
+          className="hide-scrollbar flex h-11 max-w-full items-center gap-1 overflow-x-auto rounded-full border border-[#d9dde6] bg-[#f0f1f4] p-1"
         >
           {links.map((l) => {
             const active = isActive(l.href);
@@ -54,10 +54,10 @@ export function TopNav() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition-all sm:px-5 ${
+                className={`flex h-9 min-w-[100px] items-center justify-center whitespace-nowrap rounded-full px-5 text-sm font-semibold transition-all ${
                   active
-                    ? "bg-white text-[#111827] shadow-[0_1px_2px_rgba(15,23,42,0.08)]"
-                    : "text-[#4b5565] hover:bg-white/70 hover:text-[#111827]"
+                    ? "bg-white text-[#111827] shadow-[0_2px_6px_rgba(15,23,42,0.08)]"
+                    : "text-[#475467] hover:bg-white/70 hover:text-[#111827]"
                 }`}
               >
                 {l.label}
@@ -66,13 +66,13 @@ export function TopNav() {
           })}
         </nav>
 
-        <div className="flex items-center gap-4 justify-self-end">
-          <Link href="/" className="hidden text-xs font-medium text-[#344054] hover:text-[#2f80ed] sm:inline-flex">
+        <div className="flex items-center gap-5 justify-self-end">
+          <Link href="/" className="hidden text-sm font-medium text-[#344054] hover:text-[#2f80ed] sm:inline-flex">
             Sign In
           </Link>
           <Link
             href="/onboarding"
-            className="inline-flex min-h-9 items-center justify-center rounded-xl bg-[#2f80ed] px-4 text-xs font-semibold text-white shadow-[0_8px_18px_rgba(47,128,237,0.28)] transition-all hover:bg-[#1f6fd5] sm:px-5"
+            className="inline-flex h-10 items-center justify-center rounded-xl bg-[#2f80ed] px-5 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(47,128,237,0.30)] transition-all hover:bg-[#1f6fd5]"
           >
             Get Started
           </Link>
