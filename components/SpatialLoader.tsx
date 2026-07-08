@@ -48,7 +48,8 @@ export default function SpatialLoader({ onComplete }: { onComplete: () => void }
         <Canvas camera={{ position: [0, 0, 3] }}>
           <ambientLight intensity={0.5} />
           <directionalLight position={[2, 2, 5]} intensity={1} />
-          <Icosahedron args={[1, 1]} speed={2}>
+          {/* FIXED: Removed the invalid speed prop from Icosahedron */}
+          <Icosahedron args={[1, 1]}>
             <MeshDistortMaterial color="#5B6CFF" wireframe distort={0.3} speed={2} />
           </Icosahedron>
           <OrbitControls autoRotate autoRotateSpeed={4} enableZoom={false} />
