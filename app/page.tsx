@@ -230,10 +230,12 @@ export default function MahaPolyDashboard() {
 
               {/* STEP 2: FULL CATEGORY CHIPS */}
               <div>
-                <div className="flex justify-between items-center mb-3">
-                  <label className="font-mono text-xs text-[#8A93A6] uppercase tracking-widest block">02 / Category</label>
-                  <Info size={14} className="text-[#8A93A6] cursor-help" title="Select your specific category to see accurate cutoffs." />
-                </div>
+              <div className="flex justify-between items-center mb-3">
+                <label className="font-mono text-xs text-[#8A93A6] uppercase tracking-widest block">02 / Category</label>
+                  <span title="Select your specific category to see accurate cutoffs.">
+                   <Info size={14} className="text-[#8A93A6] cursor-help" />
+                  </span>
+              </div>
                 <div className="flex flex-wrap gap-2">
                   {CATEGORIES.map(c => (
                     <button 
