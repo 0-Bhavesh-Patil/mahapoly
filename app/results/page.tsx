@@ -95,7 +95,7 @@ export default function ResultsPage() {
 
   if (profile === null) {
     return (
-      <div className="min-h-screen bg-[#f8fafc]">
+      <div className="min-h-screen aurora-bg">
         <TopNav />
         <div className="max-w-xl mx-auto text-center py-24 px-6">
           <Sparkles className="h-6 w-6 mx-auto mb-4 text-[#0058be]" />
@@ -105,7 +105,7 @@ export default function ResultsPage() {
           </p>
           <button
             onClick={() => router.push("/onboarding")}
-            className="px-6 py-3 rounded-lg text-sm font-medium text-white bg-[#0058be] hover:brightness-110 transition-all"
+            className="px-6 py-3 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-[#0058be] to-[#14b8a6] shadow-[0_12px_24px_rgba(0,88,190,0.22)] hover:-translate-y-0.5 transition-all"
           >
             Start my profile
           </button>
@@ -115,11 +115,11 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
+    <div className="min-h-screen aurora-bg">
       <TopNav />
       <main className="max-w-[1280px] mx-auto px-4 md:px-6 py-8 md:py-10 space-y-8">
         {/* Summary header */}
-        <div className="space-y-4">
+        <div className="space-y-4 animate-rise-in">
           <div className="flex items-end justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-[#191b23]">
@@ -132,8 +132,8 @@ export default function ResultsPage() {
                 </button>
               </p>
             </div>
-            <div className="bg-white border border-[#e2e8f0] rounded-xl px-6 py-4 flex items-center gap-4 shadow-sm">
-              <div className="w-11 h-11 rounded-full bg-[#8455ef] text-white flex items-center justify-center shrink-0">
+            <div className="glass-card rounded-2xl px-5 sm:px-6 py-4 flex items-center gap-4">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#6b38d4] to-[#14b8a6] text-white flex items-center justify-center shrink-0 shadow-[0_10px_22px_rgba(107,56,212,0.22)]">
                 <TrendingUp className="h-4.5 w-4.5" />
               </div>
               <div>
@@ -156,7 +156,7 @@ export default function ResultsPage() {
               return (
                 <div
                   key={bucket}
-                  className="bg-white rounded-xl border-t border-r border-b flex items-center gap-4 pl-5 pr-4 py-4 shadow-sm"
+                  className="bg-white/84 backdrop-blur rounded-2xl border-t border-r border-b flex items-center gap-4 pl-5 pr-4 py-4 shadow-sm lift-card"
                   style={{ borderLeftWidth: 4, borderLeftColor: m.border, borderColor: "#e2e8f0" }}
                 >
                   <div
@@ -180,7 +180,7 @@ export default function ResultsPage() {
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Sidebar filters */}
           <aside className="w-full lg:w-64 shrink-0">
-            <div className="bg-white border border-[#e2e8f0] rounded-xl p-6 space-y-6 shadow-sm lg:sticky lg:top-24">
+            <div className="glass-card rounded-2xl p-5 sm:p-6 space-y-6 lg:sticky lg:top-24">
               <div className="flex items-center justify-between pb-4 border-b border-[#c2c6d6]/60">
                 <h2 className="text-lg font-semibold text-[#191b23]">Filters</h2>
                 <button onClick={resetFilters} className="text-xs font-semibold text-[#0058be] hover:underline">
@@ -197,7 +197,7 @@ export default function ResultsPage() {
                     placeholder="Search districts..."
                     value={districtQuery}
                     onChange={(e) => setDistrictQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-[#c2c6d6] rounded-lg text-sm outline-none focus:border-[#0058be]"
+                    className="w-full pl-9 pr-3 py-3 bg-white border border-[#c2c6d6] rounded-xl text-sm outline-none focus:border-[#0058be] focus:ring-4 focus:ring-[#0058be]/15 transition-all"
                   />
                 </div>
                 <p className="text-[11px] text-[#9aa0ae]">Best-effort text match, not verified district data.</p>
@@ -232,9 +232,9 @@ export default function ResultsPage() {
                   placeholder="Search branches..."
                   value={branchSearch}
                   onChange={(e) => setBranchSearch(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-[#c2c6d6] rounded-lg text-sm outline-none focus:border-[#0058be]"
+                  className="w-full px-3 py-3 bg-white border border-[#c2c6d6] rounded-xl text-sm outline-none focus:border-[#0058be] focus:ring-4 focus:ring-[#0058be]/15 transition-all"
                 />
-                <div className="max-h-40 overflow-y-auto space-y-1.5 pt-1">
+                <div className="max-h-52 lg:max-h-40 overflow-y-auto space-y-1.5 pt-1 pr-1">
                   {filteredBranchList.slice(0, 40).map((b) => (
                     <label key={b.idx} className="flex items-center gap-2 text-sm text-[#191b23] cursor-pointer">
                       <input
@@ -257,7 +257,7 @@ export default function ResultsPage() {
 
           {/* Results feed */}
           <div className="flex-1 min-w-0 space-y-4">
-            <div className="flex items-center justify-between bg-[#f2f3fd] border border-[#c2c6d6]/30 rounded-lg px-3 py-2">
+            <div className="flex items-center justify-between bg-white/70 backdrop-blur border border-white rounded-xl px-3 py-2 shadow-sm">
               <span className="text-xs font-semibold text-[#424754] pl-2">
                 Showing {Math.min(visible, allMatches.length)} of {allMatches.length} matches
               </span>
@@ -299,7 +299,7 @@ export default function ResultsPage() {
             {visible < allMatches.length && (
               <button
                 onClick={() => setVisible((v) => v + 20)}
-                className="w-full py-3 rounded-xl border border-[#e2e8f0] bg-white text-[#424754] hover:border-[#c2c6d6] transition-colors text-sm font-medium"
+                className="w-full py-3 rounded-xl border border-[#e2e8f0] bg-white text-[#424754] hover:border-[#0058be]/30 hover:-translate-y-0.5 hover:shadow-sm transition-all text-sm font-medium"
               >
                 Show more
               </button>
@@ -333,15 +333,15 @@ function ResultCard({
   const decoded = decodeSeat(match.seatCode);
 
   return (
-    <article className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
-      <div className="p-6 space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4 min-w-0">
-            <div className="w-12 h-12 rounded-lg bg-[#ecedf7] border border-[#c2c6d6]/50 flex items-center justify-center shrink-0">
+    <article className="bg-white/88 backdrop-blur border border-white rounded-2xl shadow-sm overflow-hidden lift-card">
+      <div className="p-4 sm:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-[#eff6ff] to-[#ccfbf1] border border-[#c2c6d6]/50 flex items-center justify-center shrink-0">
               <Building2 className="h-5 w-5 text-[#0058be]" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-[20px] font-semibold text-[#001a42] truncate">{college.name}</h3>
+              <h3 className="text-lg sm:text-[20px] font-semibold text-[#001a42] sm:truncate leading-snug">{college.name}</h3>
               {location && (
                 <div className="flex items-center gap-1 text-[#424754] mt-0.5">
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
@@ -350,9 +350,9 @@ function ResultCard({
               )}
             </div>
           </div>
-          <div className="flex flex-col items-end gap-2 shrink-0">
+          <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0">
             <BucketBadge bucket={match.bucket} />
-            <button onClick={onStar} aria-label="Shortlist">
+            <button onClick={onStar} aria-label="Shortlist" className="h-10 w-10 rounded-full border border-[#e2e8f0] bg-white flex items-center justify-center hover:border-[#fbbf24] transition-colors">
               <Star className={`h-5 w-5 ${starred ? "fill-[#FBBF24] text-[#FBBF24]" : "text-[#c2c6d6] hover:text-[#9aa0ae]"}`} />
             </button>
           </div>
@@ -360,7 +360,7 @@ function ResultCard({
 
         <div className="border-t border-[#c2c6d6]/50" />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <div className="text-xs font-semibold tracking-wide text-[#424754] uppercase mb-1">Branch</div>
             <div className="text-[15px] font-medium text-[#191b23]">{branch}</div>
@@ -373,7 +373,7 @@ function ResultCard({
             <div className="text-xs font-semibold tracking-wide text-[#424754] uppercase mb-1">Historical Cut-off</div>
             <div className="text-[15px] font-medium text-[#191b23] tabular-nums">{match.cutoff.toFixed(2)}%</div>
           </div>
-          <div className="text-right md:text-left">
+          <div className="text-left">
             <div className="text-xs font-semibold tracking-wide text-[#424754] uppercase mb-1">Merit Difference</div>
             <MarginBadge margin={match.margin} />
           </div>
@@ -381,7 +381,7 @@ function ResultCard({
 
         <button
           onClick={onToggleExpand}
-          className="flex items-center gap-1.5 text-sm font-medium text-[#0058be] hover:underline pt-1"
+          className="flex min-h-10 items-center gap-1.5 text-sm font-medium text-[#0058be] hover:underline pt-1"
         >
           <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
           Why this matches

@@ -29,4 +29,3 @@ npm run dev
 
 ## Deploy
 Push this folder to a GitHub repo, then import it in Vercel — no configuration needed.
-"# mahapoly-search-updated" 

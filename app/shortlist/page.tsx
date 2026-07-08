@@ -67,13 +67,13 @@ export default function ShortlistPage() {
   if (!loaded) return null;
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className="min-h-screen aurora-bg">
       <div className="no-print">
         <TopNav />
       </div>
 
       <main className="max-w-[1280px] mx-auto px-4 md:px-8 py-8 md:py-10">
-        <div className="no-print flex items-end justify-between flex-wrap gap-4 mb-8">
+        <div className="no-print flex items-end justify-between flex-wrap gap-4 mb-8 animate-rise-in">
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-[#0f172a]">
               Shortlisted Colleges
@@ -81,16 +81,16 @@ export default function ShortlistPage() {
             <p className="mt-1 text-[#64748b]">Review and reorder your selections for the CAP option form.</p>
           </div>
           {entries.length > 0 && (
-            <div className="flex gap-3">
+            <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-3">
               <button
                 onClick={handleShare}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-white border border-[#e2e8f0] shadow-sm hover:border-[#c2c6d6] transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium bg-white border border-[#e2e8f0] shadow-sm hover:border-[#0058be]/30 hover:-translate-y-0.5 transition-all"
               >
                 <Share2 className="h-3.5 w-3.5" /> Share
               </button>
               <button
                 onClick={() => window.print()}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-[#2563eb] shadow-sm hover:brightness-110 transition-all"
+                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-[#0058be] to-[#14b8a6] shadow-[0_12px_24px_rgba(0,88,190,0.22)] hover:-translate-y-0.5 transition-all"
               >
                 <Printer className="h-3.5 w-3.5" /> Print Option Form
               </button>
@@ -139,7 +139,7 @@ export default function ShortlistPage() {
                 return (
                   <div
                     key={e.key}
-                    className="bg-white border border-[#e2e8f0] rounded-2xl p-4 md:p-6 flex flex-col md:flex-row md:items-center gap-4 print:border-gray-300 print:shadow-none print:rounded-lg"
+                    className="bg-white/88 backdrop-blur border border-white rounded-2xl p-4 md:p-6 flex flex-col md:flex-row md:items-center gap-4 shadow-sm lift-card print:border-gray-300 print:shadow-none print:rounded-lg"
                   >
                     <div className="flex items-center gap-4 md:w-[170px] shrink-0">
                       <div className="w-8 h-8 rounded bg-[#2563eb] text-white font-semibold flex items-center justify-center shrink-0 print:bg-gray-100 print:text-black">
@@ -170,24 +170,24 @@ export default function ShortlistPage() {
                     <div className="md:w-[110px] flex md:justify-center">
                       <CollegeTypeTag type={type} />
                     </div>
-                    <div className="no-print flex items-center gap-1 md:w-[100px] md:justify-end">
+                    <div className="no-print grid grid-cols-3 gap-2 md:flex md:items-center md:w-[100px] md:justify-end">
                       <button
                         onClick={() => move(idx, -1)}
                         disabled={idx === 0}
-                        className="p-1.5 rounded-lg border border-[#e2e8f0] text-[#64748b] hover:border-[#c2c6d6] disabled:opacity-25 transition-colors"
+                        className="min-h-10 rounded-xl border border-[#e2e8f0] text-[#64748b] hover:border-[#c2c6d6] disabled:opacity-25 transition-colors flex items-center justify-center"
                       >
                         <ArrowUp className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => move(idx, 1)}
                         disabled={idx === entries.length - 1}
-                        className="p-1.5 rounded-lg border border-[#e2e8f0] text-[#64748b] hover:border-[#c2c6d6] disabled:opacity-25 transition-colors"
+                        className="min-h-10 rounded-xl border border-[#e2e8f0] text-[#64748b] hover:border-[#c2c6d6] disabled:opacity-25 transition-colors flex items-center justify-center"
                       >
                         <ArrowDown className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => remove(e.key)}
-                        className="p-1.5 rounded-lg border border-[#e2e8f0] text-[#64748b] hover:text-[#dc2626] hover:border-[#fca5a5] transition-colors"
+                        className="min-h-10 rounded-xl border border-[#e2e8f0] text-[#64748b] hover:text-[#dc2626] hover:border-[#fca5a5] transition-colors flex items-center justify-center"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -199,7 +199,7 @@ export default function ShortlistPage() {
               <div className="no-print flex justify-center pt-4">
                 <Link
                   href="/results"
-                  className="flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-medium text-[#2563eb] bg-white border border-dashed border-[#2563eb] hover:bg-[#eff6ff] transition-colors"
+                  className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium text-[#2563eb] bg-white border border-dashed border-[#2563eb] hover:bg-[#eff6ff] hover:-translate-y-0.5 transition-all"
                 >
                   <Plus className="h-3.5 w-3.5" /> Add More Colleges
                 </Link>
@@ -208,7 +208,7 @@ export default function ShortlistPage() {
 
             {/* Summary */}
             <div className="no-print lg:col-span-4 space-y-6">
-              <div className="bg-white border border-[#e2e8f0] rounded-2xl p-6 shadow-sm">
+              <div className="glass-card rounded-2xl p-6">
                 <h2 className="text-lg font-semibold text-[#0f172a] pb-4 border-b border-[#e2e8f0] mb-4">
                   Shortlist Summary
                 </h2>
@@ -229,7 +229,7 @@ export default function ShortlistPage() {
                       </div>
                       <div className="h-2 rounded-full bg-[#f1f5f9]">
                         <div
-                          className="h-2 rounded-full bg-[#2563eb]"
+                          className="h-2 rounded-full bg-gradient-to-r from-[#0058be] to-[#14b8a6]"
                           style={{ width: `${(count / entries.length) * 100}%` }}
                         />
                       </div>
@@ -238,7 +238,7 @@ export default function ShortlistPage() {
                 </div>
               </div>
 
-              <div className="bg-[#eff6ff]/50 border border-[#dbeafe] rounded-2xl p-5 flex gap-3">
+              <div className="bg-white/78 backdrop-blur border border-[#dbeafe] rounded-2xl p-5 flex gap-3 shadow-sm">
                 <Info className="h-5 w-5 text-[#2563eb] shrink-0 mt-0.5" />
                 <div>
                   <h3 className="text-sm font-semibold text-[#2563eb] mb-1">Important Instruction</h3>
