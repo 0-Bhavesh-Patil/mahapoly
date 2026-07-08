@@ -32,20 +32,23 @@ export function TopNav() {
     pathname === href || (href === "/onboarding" && pathname.startsWith("/onboarding"));
 
   return (
-    <header className="sticky top-0 z-30 flex w-full flex-col items-start border-b border-black/[0.05] bg-white/70 backdrop-blur-[10px]">
-      <div className="mx-auto grid min-h-[74px] w-full max-w-[1280px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4">
-        <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2.5 justify-self-start">
-          <div className="flex h-8 w-8 items-center justify-center rounded border border-[#cfe0ff] bg-[#edf4ff] text-[#2f80ed]">
-            <GraduationCap className="h-4 w-4" />
+    <header className="sticky top-0 z-30 flex w-full flex-col items-center justify-center bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <div className="flex w-full max-w-[1280px] items-center justify-between py-4 px-6">
+        
+        {/* Left: Logo */}
+        <Link href="/" className="flex shrink-0 items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-500">
+            <GraduationCap className="h-6 w-6" strokeWidth={2} />
           </div>
-          <span className="truncate text-[28px] font-bold leading-none tracking-[-0.01em] text-[#101828]">
+          <span className="text-gray-900 text-2xl font-bold tracking-tight">
             MahaPoly
           </span>
         </Link>
 
+        {/* Center: Navigation Pill */}
         <nav
           aria-label="Primary navigation"
-          className="hide-scrollbar flex h-11 max-w-full items-center gap-1 overflow-x-auto rounded-full border border-[#d9dde6] bg-[#f0f1f4] p-1"
+          className="hidden md:flex shrink-0 items-center bg-gray-100/70 p-1 rounded-full border border-gray-200/50"
         >
           {links.map((l) => {
             const active = isActive(l.href);
@@ -54,10 +57,10 @@ export function TopNav() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex h-9 min-w-[100px] items-center justify-center whitespace-nowrap rounded-full px-5 text-sm font-semibold transition-all ${
+                className={`flex items-center justify-center rounded-full transition-all duration-200 ease-in-out ${
                   active
-                    ? "bg-white text-[#111827] shadow-[0_2px_6px_rgba(15,23,42,0.08)]"
-                    : "text-[#475467] hover:bg-white/70 hover:text-[#111827]"
+                    ? "bg-white py-2 px-6 shadow-sm border border-gray-200/50 text-gray-900 font-medium text-sm"
+                    : "py-2 px-6 text-gray-500 font-medium text-sm hover:text-gray-900"
                 }`}
               >
                 {l.label}
@@ -66,16 +69,14 @@ export function TopNav() {
           })}
         </nav>
 
-        <div className="flex items-center gap-5 justify-self-end">
-          <Link href="/" className="hidden text-sm font-medium text-[#344054] hover:text-[#2f80ed] sm:inline-flex">
+        {/* Right: Actions */}
+        <div className="flex shrink-0 items-center gap-6">
+          <Link href="/signin" className="hidden text-sm font-medium text-gray-600 hover:text-gray-900 sm:block transition-colors">
             Sign In
-          </Link>
-          <Link href="/results" className="hidden text-sm font-medium text-[#344054] hover:text-[#2f80ed] sm:inline-flex">
-            College List
           </Link>
           <Link
             href="/onboarding"
-            className="inline-flex h-10 items-center justify-center rounded-xl bg-[#2f80ed] px-5 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(47,128,237,0.30)] transition-all hover:bg-[#1f6fd5]"
+            className="flex items-center justify-center bg-blue-500 py-2.5 px-6 rounded-full shadow-[0_0_24px_rgba(59,130,246,0.35)] text-white text-sm font-medium transition-all hover:bg-blue-600 hover:shadow-[0_0_28px_rgba(59,130,246,0.45)]"
           >
             Get Started
           </Link>
@@ -87,23 +88,27 @@ export function TopNav() {
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-[#eef1f6] bg-[#f7f8fd] px-6 py-16">
-      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-6 text-center">
-        <Link href="/" className="flex items-center gap-2 text-[#667085]">
-          <GraduationCap className="h-3.5 w-3.5" />
-          <span className="text-sm font-bold tracking-tight">
+    <footer className="flex flex-col items-center justify-center w-full bg-white py-8 px-6 border-t border-gray-200">
+      <div className="flex flex-col items-center w-full gap-3">
+        
+        {/* Brand Logo & Name */}
+        <Link href="/" className="flex items-center gap-2">
+          <GraduationCap className="h-5 w-5 text-gray-900" strokeWidth={2.5} />
+          <span className="text-gray-900 text-lg font-bold">
             MahaPoly
           </span>
         </Link>
-        <div className="max-w-2xl space-y-3">
-          <p className="text-[11px] leading-relaxed text-[#8a93a6]">
-            Disclaimer: MahaPoly is an independent predictive tool based on historical CAP data. It is not affiliated
-            with the DTE Maharashtra. Predictions do not guarantee admission.
-          </p>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#a0a7b8]">
-            © 2024 Mahapoly. All rights reserved.
-          </p>
-        </div>
+
+        {/* Disclaimer */}
+        <p className="text-gray-800 text-[13px] sm:text-sm text-center">
+          Disclaimer: MahaPoly is an independent predictive tool based on historical CAP data. It is not affiliated with the DTEMaharashtra. Predictions do not guarantee admission.
+        </p>
+
+        {/* Copyright */}
+        <span className="text-gray-800 text-[13px] sm:text-sm font-medium">
+          © 2024 MAHAPOLY. ALL RIGHTS RESERVED.
+        </span>
+        
       </div>
     </footer>
   );
