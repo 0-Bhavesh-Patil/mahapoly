@@ -17,14 +17,16 @@ export function CursorGlow() {
     return () => window.removeEventListener("pointermove", move);
   }, []);
 
-  return <div className="cursor-glow" aria-hidden="true" />;
+  return <div className="cursor-glow" aria-hidden="true" />[cite: 1];
 }
 
 export function TopNav() {
   const pathname = usePathname();
+  
   const links = [
     { href: "/", label: "Overview" },
-    { href: "/results", label: "Colleges" },
+    { href: "/results", label: "List" },
+    { href: "/shortlist", label: "Shortlist" },
     { href: "/onboarding", label: "Cut-offs" },
   ];
 
@@ -132,7 +134,7 @@ export function Loading3D() {
         </div>
       </div>
     </div>
-  );
+  )[cite: 1];
 }
 
 export function Pill({
@@ -154,7 +156,7 @@ export function Pill({
     >
       {children}
     </button>
-  );
+  )[cite: 1];
 }
 
 export function CheckPill({
@@ -176,21 +178,21 @@ export function CheckPill({
     >
       {children}
     </button>
-  );
+  )[cite: 1];
 }
 
 const BUCKET_META: Record<MatchBucket, { label: string; border: string; bg: string; text: string; softBg: string }> = {
   safe: { label: "Safe Match", border: "#10b981", bg: "#d1fae5", text: "#059669", softBg: "#ecfdf5" },
   competitive: { label: "Competitive", border: "#3b82f6", bg: "#dbeafe", text: "#2563eb", softBg: "#eff6ff" },
   aspirational: { label: "Aspirational", border: "#f59e0b", bg: "#fef3c7", text: "#b45309", softBg: "#fffbeb" },
-};
+}[cite: 1];
 
 export function bucketMeta(bucket: MatchBucket) {
-  return BUCKET_META[bucket];
+  return BUCKET_META[bucket][cite: 1];
 }
 
 export function BucketBadge({ bucket }: { bucket: MatchBucket }) {
-  const m = bucketMeta(bucket);
+  const m = bucketMeta(bucket)[cite: 1];
   return (
     <span
       className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border"
@@ -198,19 +200,19 @@ export function BucketBadge({ bucket }: { bucket: MatchBucket }) {
     >
       {m.label}
     </span>
-  );
+  )[cite: 1];
 }
 
 export function MarginBadge({ margin }: { margin: number }) {
-  const bucket: MatchBucket = margin > 2 ? "safe" : margin >= -2 ? "competitive" : "aspirational";
-  const m = bucketMeta(bucket);
-  const sign = margin >= 0 ? "+" : "";
+  const bucket: MatchBucket = margin > 2 ? "safe" : margin >= -2 ? "competitive" : "aspirational"[cite: 1];
+  const m = bucketMeta(bucket)[cite: 1];
+  const sign = margin >= 0 ? "+" : ""[cite: 1];
   return (
     <span className="inline-flex px-2 py-0.5 rounded text-sm font-medium tabular-nums" style={{ backgroundColor: m.bg, color: m.text }}>
       {sign}
       {margin.toFixed(2)}%
     </span>
-  );
+  )[cite: 1];
 }
 
 export function CollegeTypeTag({ type }: { type: "government" | "aided" | "unaided" }) {
@@ -218,9 +220,9 @@ export function CollegeTypeTag({ type }: { type: "government" | "aided" | "unaid
     government: "bg-[#ecfdf5] border-[#d1fae5] text-[#047857]",
     aided: "bg-[#eff6ff] border-[#dbeafe] text-[#1d4ed8]",
     unaided: "bg-[#f1f5f9] border-[#e2e8f0] text-[#334155]",
-  };
-  const labels: Record<string, string> = { government: "Government", aided: "Govt. Aided", unaided: "Un-Aided" };
+  }[cite: 1];
+  const labels: Record<string, string> = { government: "Government", aided: "Govt. Aided", unaided: "Un-Aided" }[cite: 1];
   return (
     <span className={`inline-flex px-2.5 py-1 rounded-md text-xs border ${styles[type]}`}>{labels[type]}</span>
-  );
+  )[cite: 1];
 }
