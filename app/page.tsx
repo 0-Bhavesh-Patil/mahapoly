@@ -1,349 +1,258 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import {
-  ArrowRight,
-  ArrowLeft,
-  GraduationCap,
-  Building2,
-  MapPin,
-  CheckCircle2,
-  Lock,
-  Star
-} from "lucide-react";
-import raw from "../data.json";
-import {
-  decodeSeat,
-  resolveSeatCodes,
-  CATEGORY_OPTIONS,
-  LEVEL_OPTIONS,
-  CANDIDATURE_OPTIONS,
-  GENDER_OPTIONS,
-  type Candidature,
-  type Gender,
-  type Level,
-} from "../lib/seatTypes";
+import Link from "next/link";
+import { ArrowRight, GraduationCap, ListChecks, Target } from "lucide-react";
+import { DATA, FLAT } from "../lib/data";
 
-// ---------- Data Layer ----------
-type RawCutoff = [number, number, number, number];
-type RawCourse = [number, RawCutoff[]];
-type RawCollege = { code: string; name: string; status: string; district?: string; courses: RawCourse[] };
-type RawData = { branches: string[]; seatTypes: string[]; stages: string[]; colleges: RawCollege[] };
+const TICKER_ITEMS = [
+  "418+ colleges mapped",
+  "77,000+ real CAP cutoff records",
+  "63 branches covered",
+  "CAP Round 1 predictions",
+  "Built from official DTE data",
+];
 
-const DATA = raw as unknown as RawData;
-
-type FlatRow = { ci: number; branch: number; round: number; seat: number; stage: number; merit: number };
-
-const FLAT: FlatRow[] = (() => {
-  const rows: FlatRow[] = [];
-  DATA.colleges.forEach((college, ci) => {
-    college.courses.forEach(([branch, cutoffs]) => {
-      cutoffs.forEach(([round, seat, stage, merit]) => {
-        rows.push({ ci, branch, round, seat, stage, merit });
-      });
-    });
-  });
-  return rows;
-})();
-
-const BRANCH_LIST = DATA.branches.map((name, idx) => ({ idx, name })).sort((a, b) => a.name.localeCompare(b.name));
-const SEAT_INDEX = new Map<string, number>(DATA.seatTypes.map((s, i) => [s, i]));
-
-// Dynamic Extraction for new filters
-const STATUS_OPTIONS = Array.from(new Set(DATA.colleges.map(c => c.status))).sort();
-
-// Helper to extract district if it's not explicitly in the JSON yet
-const getDistrict = (college: RawCollege) => {
-  if (college.district) return college.district;
-  const parts = college.name.split(",");
-  return parts[parts.length - 1].trim();
-};
-const DISTRICT_OPTIONS = Array.from(new Set(DATA.colleges.map(getDistrict))).sort();
-
-// ---------- UI Components ----------
-function MarginBar({ merit, cutoff }: { merit: number; cutoff: number }) {
-  const margin = merit - cutoff;
-  const safe = margin >= 5;
-  const tight = margin >= 0 && margin < 5;
-  const color = safe ? "#10B981" : tight ? "#F59E0B" : "#62626A";
-  const pct = Math.max(4, Math.min(100, (cutoff / 100) * 100));
-  
-  return (
-    <div className="flex items-center gap-2 min-w-[140px]">
-      <div className="relative flex-1 h-2 rounded-full bg-[#1C1C24] overflow-hidden">
-        <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
-      </div>
-      <span className="text-xs font-bold tabular-nums" style={{ color }}>
-        {margin > 0 ? "+" : ""}{margin.toFixed(2)}%
-      </span>
-    </div>
-  );
-}
-
-// ---------- Main Application ----------
-export default function PolytechnicWizard() {
-  const [step, setStep] = useState(1);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [leadContact, setLeadContact] = useState("");
-
-  // Core Filters
-  const [merit, setMerit] = useState<string>("");
-  const [category, setCategory] = useState("OPEN");
-  
-  // Advanced Filters
-  const [candidature, setCandidature] = useState<Candidature>("N");
-  const [gender, setGender] = useState<Gender>("G");
-  const [level, setLevel] = useState<Level>("H");
-  const [round, setRound] = useState(1);
-  
-  // Target Filters (New)
-  const [branchFilter, setBranchFilter] = useState<number | null>(null);
-  const [districtFilter, setDistrictFilter] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
-
-  const meritNum = parseFloat(merit);
-  const hasValidMerit = merit.trim() !== "" && !isNaN(meritNum) && meritNum >= 0 && meritNum <= 100;
-
-  // Heavy Filtering Engine
-  const results = useMemo(() => {
-    if (!hasValidMerit) return [];
-    const codes = resolveSeatCodes({ category, candidature, gender, level });
-    const seatIdxs = new Set(codes.map((c) => SEAT_INDEX.get(c)).filter((v): v is number => v !== undefined));
-    if (seatIdxs.size === 0) return [];
-
-    const best = new Map<string, FlatRow>();
-    for (const row of FLAT) {
-      if (row.round !== round) continue;
-      if (!seatIdxs.has(row.seat)) continue;
-      if (row.merit > meritNum) continue; 
-      if (branchFilter !== null && row.branch !== branchFilter) continue;
-      
-      const college = DATA.colleges[row.ci];
-      if (statusFilter && college.status !== statusFilter) continue;
-      if (districtFilter && getDistrict(college) !== districtFilter) continue;
-
-      const key = `${row.ci}-${row.branch}`;
-      const existing = best.get(key);
-      if (!existing || row.merit > existing.merit) best.set(key, row);
-    }
-    return Array.from(best.values()).sort((a, b) => b.merit - a.merit);
-  }, [hasValidMerit, meritNum, category, candidature, gender, level, round, branchFilter, statusFilter, districtFilter]);
-
-  const handleUnlock = () => {
-    // In a real app, send `leadContact` and `results` to your CRM/Database here
-    console.log("Lead Captured:", leadContact);
-    setIsUnlocked(true);
-  };
+export default function LandingPage() {
+  const branchCount = DATA.branches.length;
+  const recordCount = FLAT.length;
 
   return (
-    <div className="min-h-screen bg-[#060608] text-[#F3F3F5] font-sans flex flex-col justify-center items-center p-4">
-      
-      {/* Progress Indicator */}
-      {step < 4 && (
-        <div className="w-full max-w-xl h-1.5 bg-[#1C1C24] mb-8 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-[#00D9FF] transition-all duration-500 ease-out" 
-            style={{ width: `${(step / 3) * 100}%` }}
-          />
-        </div>
-      )}
-
-      <div className="w-full max-w-xl bg-[#0D0D12] border border-[#1C1C24] p-6 md:p-8 rounded-3xl shadow-2xl">
-        
-        {/* STEP 1: The Basics */}
-        {step === 1 && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div>
-              <span className="text-xs font-bold text-[#00D9FF] tracking-widest uppercase">Step 1 of 3</span>
-              <h2 className="text-2xl font-bold mt-2">Let's find your colleges</h2>
-              <p className="text-sm text-[#9A9AA2] mt-1">Enter your exact SSC percentage to begin.</p>
+    <div className="min-h-screen bg-white text-[#191b23]">
+      {/* Header */}
+      <header className="backdrop-blur-md bg-white/70 border-b border-black/[0.05] sticky top-0 z-30">
+        <div className="max-w-[1280px] mx-auto px-4 h-[72px] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-[#3b82f6]/10 border border-[#3b82f6]/20 flex items-center justify-center">
+              <GraduationCap className="h-4.5 w-4.5 text-[#3b82f6]" />
             </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-[#62626A] uppercase mb-2">Merit Percentage</label>
-                <input
-                  type="number"
-                  placeholder="e.g. 84.60"
-                  value={merit}
-                  onChange={(e) => setMerit(e.target.value)}
-                  className="w-full bg-[#16161F] border border-[#1C1C24] p-4 rounded-xl text-3xl font-bold text-center outline-none focus:border-[#00D9FF] text-[#00D9FF] placeholder:text-[#62626A] transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#62626A] uppercase mb-2">Caste Category</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full p-4 bg-[#16161F] border border-[#1C1C24] rounded-xl text-[#F3F3F5] outline-none focus:border-[#00D9FF] appearance-none"
-                >
-                  {CATEGORY_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <button
-              disabled={!hasValidMerit}
-              onClick={() => setStep(2)}
-              className="w-full bg-[#00D9FF] hover:bg-[#00D9FF]/90 disabled:opacity-50 text-[#060608] font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 mt-4"
+            <span className="font-bold text-[22px] tracking-tight">MahaPoly</span>
+          </div>
+          <nav className="hidden md:flex items-center gap-1 bg-black/[0.04] border border-black/[0.05] rounded-full p-1">
+            <Link href="/" className="px-5 py-1.5 rounded-full text-sm font-medium bg-white shadow-sm">
+              Overview
+            </Link>
+            <Link href="/results" className="px-5 py-1.5 rounded-full text-sm font-medium text-[#565e74] hover:text-[#191b23]">
+              Colleges
+            </Link>
+            <Link href="/onboarding" className="px-5 py-1.5 rounded-full text-sm font-medium text-[#565e74] hover:text-[#191b23]">
+              Cut-offs
+            </Link>
+          </nav>
+          <div className="flex items-center gap-5">
+            <Link href="/onboarding" className="text-sm font-medium text-[#565e74] hover:text-[#191b23] hidden sm:block">
+              Skip to search
+            </Link>
+            <Link
+              href="/onboarding"
+              className="px-5 py-2 rounded-full text-sm font-medium text-white bg-[#3b82f6] shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:brightness-110 transition-all"
             >
-              Continue <ArrowRight className="h-5 w-5" />
-            </button>
+              Get Started
+            </Link>
           </div>
-        )}
+        </div>
+      </header>
 
-        {/* STEP 2: The Preferences (Including New Filters) */}
-        {step === 2 && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div>
-              <span className="text-xs font-bold text-[#00D9FF] tracking-widest uppercase">Step 2 of 3</span>
-              <h2 className="text-2xl font-bold mt-2">Set your preferences</h2>
-              <p className="text-sm text-[#9A9AA2] mt-1">Narrow down your results by location and branch.</p>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-[#62626A] uppercase mb-2 flex items-center gap-1.5"><MapPin className="h-4 w-4"/> District</label>
-                <select
-                  value={districtFilter}
-                  onChange={(e) => setDistrictFilter(e.target.value)}
-                  className="w-full p-3.5 bg-[#16161F] border border-[#1C1C24] rounded-xl text-[#F3F3F5] outline-none focus:border-[#00D9FF]"
-                >
-                  <option value="">Any District</option>
-                  {DISTRICT_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#62626A] uppercase mb-2 flex items-center gap-1.5"><Building2 className="h-4 w-4"/> College Status</label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full p-3.5 bg-[#16161F] border border-[#1C1C24] rounded-xl text-[#F3F3F5] outline-none focus:border-[#00D9FF]"
-                >
-                  <option value="">Any Status (Govt & Private)</option>
-                  {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#62626A] uppercase mb-2 flex items-center gap-1.5"><GraduationCap className="h-4 w-4"/> Branch</label>
-                <select
-                  value={branchFilter === null ? "" : branchFilter}
-                  onChange={(e) => setBranchFilter(e.target.value ? Number(e.target.value) : null)}
-                  className="w-full p-3.5 bg-[#16161F] border border-[#1C1C24] rounded-xl text-[#F3F3F5] outline-none focus:border-[#00D9FF]"
-                >
-                  <option value="">Any Branch</option>
-                  {BRANCH_LIST.map(b => <option key={b.idx} value={b.idx}>{b.name}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <button onClick={() => setStep(1)} className="p-4 rounded-xl border border-[#1C1C24] text-[#9A9AA2] hover:bg-[#16161F] transition-colors"><ArrowLeft className="h-5 w-5" /></button>
-              <button
-                onClick={() => setStep(3)}
-                className="flex-1 bg-[#00D9FF] hover:bg-[#00D9FF]/90 text-[#060608] font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                Find Matches <ArrowRight className="h-5 w-5" />
-              </button>
-            </div>
+      {/* Hero */}
+      <section className="relative overflow-hidden pt-16 pb-24 px-6">
+        <div
+          className="pointer-events-none absolute -top-64 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full blur-[80px] opacity-60"
+          style={{ background: "radial-gradient(circle, rgba(59,130,246,0.15), transparent 60%)" }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-48 -right-48 w-[800px] h-[800px] rounded-full blur-[80px] opacity-40"
+          style={{ background: "radial-gradient(circle, rgba(139,92,246,0.15), transparent 60%)" }}
+        />
+        <div className="relative max-w-[1280px] mx-auto flex flex-col items-center text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/50 backdrop-blur border border-black/[0.05] shadow-sm mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
+            <span className="text-xs font-medium text-[#424754] tracking-wide">Live CAP Data 2026</span>
           </div>
-        )}
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] bg-gradient-to-b from-[#191b23] to-[#565e74] bg-clip-text text-transparent max-w-4xl">
+            Find the right Polytechnic college for your merit.
+          </h1>
+          <p className="mt-8 text-lg text-[#565e74] max-w-2xl leading-relaxed">
+            Navigate the complex admissions process with clarity. Get personalized college recommendations based on
+            your exact merit and category, drawn from real CAP cutoff records.
+          </p>
+          <div className="mt-10 flex flex-col sm:flex-row gap-4">
+            <Link
+              href="/onboarding"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-medium text-white bg-[#3b82f6] shadow-[0_0_30px_rgba(59,130,246,0.4)] hover:brightness-110 transition-all"
+            >
+              Check My Chances <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              href="/results"
+              className="inline-flex items-center px-8 py-4 rounded-full text-sm font-medium bg-white/50 backdrop-blur border border-black/[0.05] hover:bg-white transition-colors"
+            >
+              Explore Cut-offs
+            </Link>
+          </div>
 
-        {/* STEP 3: Results & Lead Generation Gate */}
-        {step === 3 && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex justify-between items-end">
-              <div>
-                <h2 className="text-2xl font-bold">Your Matches</h2>
-                <p className="text-sm text-[#9A9AA2] mt-1">Found <strong className="text-[#F3F3F5]">{results.length}</strong> possibilities for {merit}%.</p>
+          {/* Floating preview card */}
+          <div className="mt-20 w-full max-w-3xl">
+            <div className="relative rounded-3xl backdrop-blur-xl bg-white/60 border border-black/[0.08] p-1.5 shadow-[0_24px_60px_rgba(0,0,0,0.08)]">
+              <div className="absolute -top-5 -right-5 bg-white border border-[#10b981]/20 rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
+                <Target className="h-3 w-3 text-[#059669]" />
+                <span className="text-[11px] font-medium text-[#059669] tracking-wide uppercase">
+                  High Probability Match
+                </span>
               </div>
-              <button onClick={() => setStep(2)} className="text-sm text-[#00D9FF] hover:underline">Edit Filters</button>
-            </div>
-
-            {results.length === 0 ? (
-              <div className="bg-[#16161F] border border-[#1C1C24] p-8 rounded-2xl text-center">
-                <p className="text-[#9A9AA2]">No colleges found matching these exact criteria.</p>
-                <button onClick={() => setStep(2)} className="mt-4 text-[#00D9FF] font-medium text-sm">Try broadening your search</button>
-              </div>
-            ) : (
-              <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                {/* Top 3 "Free" Results */}
-                {results.slice(0, 3).map((r, index) => {
-                  const college = DATA.colleges[r.ci];
-                  return (
-                    <div key={index} className="bg-[#16161F] border border-[#1C1C24] p-4 rounded-xl relative overflow-hidden">
-                      <div className="flex justify-between gap-4 mb-2">
-                        <h3 className="font-bold text-sm leading-tight pr-4">{college.name}</h3>
-                        <span className="shrink-0 text-xs font-mono text-[#62626A]">#{college.code}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-[#9A9AA2] mb-3">
-                        <span className="bg-[#1C1C24] px-2 py-1 rounded text-[#00D9FF]">{DATA.branches[r.branch]}</span>
-                        <span>{getDistrict(college)}</span>
-                      </div>
-                      <MarginBar merit={meritNum} cutoff={r.merit} />
+              <div className="bg-white/90 rounded-[20px] border border-black/[0.05] p-8 md:p-10 grid md:grid-cols-2 gap-8 items-center text-left">
+                <div>
+                  <h3 className="text-xl md:text-2xl font-semibold tracking-tight mb-2">Your Profile Prediction</h3>
+                  <p className="text-[#565e74] mb-6">Merit Score: 82.40%</p>
+                  <div className="bg-white border border-black/[0.05] rounded-xl p-4 shadow-sm mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-[#565e74]">Matching Colleges</span>
+                      <span className="text-lg font-medium text-[#3b82f6]">12</span>
                     </div>
-                  );
-                })}
-
-                {/* The Lead Capture Gate */}
-                {!isUnlocked && results.length > 3 && (
-                  <div className="relative mt-4 pt-4">
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0D0D12] z-10" />
-                    <div className="bg-[#16161F]/40 border border-[#1C1C24]/50 p-4 rounded-xl opacity-50 blur-sm h-24" />
-                    
-                    <div className="absolute bottom-0 left-0 right-0 z-20 bg-[#16161F] border border-[#00D9FF]/30 p-6 rounded-2xl text-center shadow-2xl">
-                      <Lock className="h-6 w-6 text-[#00D9FF] mx-auto mb-3" />
-                      <h3 className="font-bold text-lg mb-1">Unlock {results.length - 3} more matches</h3>
-                      <p className="text-xs text-[#9A9AA2] mb-4">Get the full probability report and tight-match predictions sent to you.</p>
-                      
-                      <div className="flex flex-col gap-3">
-                        <input 
-                          type="tel" 
-                          placeholder="Enter WhatsApp Number" 
-                          value={leadContact}
-                          onChange={(e) => setLeadContact(e.target.value)}
-                          className="w-full bg-[#0D0D12] border border-[#1C1C24] p-3 rounded-lg text-sm text-center outline-none focus:border-[#00D9FF]"
-                        />
-                        <button 
-                          onClick={handleUnlock}
-                          disabled={leadContact.length < 10}
-                          className="w-full bg-[#00D9FF] disabled:opacity-50 text-[#060608] font-bold py-3 rounded-lg text-sm transition-all"
-                        >
-                          Unlock Full Report
-                        </button>
-                      </div>
+                    <div className="h-1 rounded-full bg-[#e1e2ec]">
+                      <div className="h-1 rounded-full bg-[#3b82f6] w-[70%]" />
                     </div>
                   </div>
-                )}
-
-                {/* Revealed Premium Results */}
-                {isUnlocked && results.slice(3).map((r, index) => {
-                  const college = DATA.colleges[r.ci];
-                  return (
-                    <div key={index + 3} className="bg-[#16161F] border border-[#1C1C24] p-4 rounded-xl">
-                      <div className="flex justify-between gap-4 mb-2">
-                        <h3 className="font-bold text-sm leading-tight">{college.name}</h3>
-                        <span className="shrink-0 text-xs font-mono text-[#62626A]">#{college.code}</span>
+                  <div className="bg-white border border-black/[0.04] rounded-xl p-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-[#3b82f6]/10 border border-[#3b82f6]/20 flex items-center justify-center">
+                        <GraduationCap className="h-4 w-4 text-[#3b82f6]" />
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-[#9A9AA2] mb-3">
-                        <span className="bg-[#1C1C24] px-2 py-1 rounded">{DATA.branches[r.branch]}</span>
-                        <span>{getDistrict(college)}</span>
+                      <div>
+                        <div className="text-sm font-medium">Govt. Poly Pune</div>
+                        <div className="text-xs text-[#565e74]">Computer Tech</div>
                       </div>
-                      <MarginBar merit={meritNum} cutoff={r.merit} />
                     </div>
-                  );
-                })}
+                    <span className="text-xs font-medium text-[#047857] bg-[#ecfdf5] border border-[#a7f3d0] px-2.5 py-1 rounded-md">
+                      Safe
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center justify-center">
+                  <div className="relative w-40 h-40 rounded-full border-8 border-[#eff6ff] flex items-center justify-center">
+                    <div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        background: "conic-gradient(#3b82f6 0% 82%, transparent 82% 100%)",
+                        mask: "radial-gradient(farthest-side, transparent calc(100% - 8px), black calc(100% - 8px))",
+                        WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 8px), black calc(100% - 8px))",
+                      }}
+                    />
+                    <span className="text-3xl font-bold">82%</span>
+                  </div>
+                  <span className="mt-3 text-xs font-medium text-[#565e74] tracking-widest uppercase">Match rate</span>
+                </div>
               </div>
-            )}
+            </div>
           </div>
-        )}
+        </div>
+      </section>
 
+      {/* Ticker */}
+      <div className="border-y border-black/[0.04] bg-black/[0.01] overflow-hidden py-4">
+        <div className="flex gap-16 whitespace-nowrap animate-[scroll_30s_linear_infinite]">
+          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((t, i) => (
+            <span key={i} className="flex items-center gap-2 text-sm font-medium text-[#565e74]">
+              <span className="text-[#10b981]">●</span> {t}
+            </span>
+          ))}
+        </div>
       </div>
+
+      {/* Stats */}
+      <section className="border-b border-black/[0.04] py-20 px-6">
+        <div className="max-w-[1280px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            { value: `${DATA.colleges.length}+`, label: "Colleges" },
+            { value: `${branchCount}`, label: "Branches" },
+            { value: `${Math.round(recordCount / 1000)}k+`, label: "Records" },
+            { value: "2026", label: "Data Year" },
+          ].map((s, i) => (
+            <div key={i} className={i > 0 ? "md:border-l border-black/[0.05] md:pl-8" : ""}>
+              <div className="text-4xl md:text-5xl font-light tracking-tight">{s.value}</div>
+              <div className="mt-3 text-xs font-medium text-[#565e74] tracking-[0.2em] uppercase">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="py-24 px-6">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">How it works</h2>
+            <p className="text-lg text-[#565e74] max-w-xl mx-auto">
+              Three simple steps to demystify your admission journey.
+            </p>
+          </div>
+          <div className="relative grid md:grid-cols-3 gap-8">
+            <div className="hidden md:block absolute top-[47px] left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
+            {[
+              {
+                Icon: Target,
+                color: "#3b82f6",
+                bg: "#eff6ff",
+                border: "#bfdbfe",
+                title: "1. Enter Profile",
+                desc: "Input your merit percentage, category, and preferences to build your admission profile.",
+              },
+              {
+                Icon: GraduationCap,
+                color: "#a855f7",
+                bg: "#faf5ff",
+                border: "#e9d5ff",
+                title: "2. Choose Branches",
+                desc: "Select your desired engineering branches to narrow down the relevant cutoff data.",
+              },
+              {
+                Icon: ListChecks,
+                color: "#10b981",
+                bg: "#ecfdf5",
+                border: "#a7f3d0",
+                title: "3. Get Matches",
+                desc: "Instantly see Safe, Competitive, and Aspirational colleges based on real cutoff data.",
+              },
+            ].map((step, i) => (
+              <div
+                key={i}
+                className="relative bg-white/50 border border-black/[0.05] rounded-3xl p-10 flex flex-col items-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.02)]"
+              >
+                <div
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 border"
+                  style={{ backgroundColor: step.bg, borderColor: step.border }}
+                >
+                  <step.Icon className="h-6 w-6" style={{ color: step.color }} />
+                </div>
+                <h3 className="text-xl font-medium tracking-tight mb-3">{step.title}</h3>
+                <p className="text-[#565e74] leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#f9f9ff] border-t border-black/[0.05] py-16 px-6">
+        <div className="max-w-[1280px] mx-auto flex flex-col items-center gap-8">
+          <div className="flex items-center gap-3">
+            <GraduationCap className="h-5 w-5 text-[#565e74] opacity-40" />
+            <span className="font-semibold text-lg text-[#565e74]">MahaPoly</span>
+          </div>
+          <div className="text-center max-w-xl space-y-2">
+            <p className="text-xs text-[#565e74]/70 leading-relaxed">
+              Disclaimer: MahaPoly is an independent tool built on historical DTE Maharashtra CAP cutoff data. It is
+              not affiliated with DTE Maharashtra. Predictions do not guarantee admission — always verify against
+              your official CAP login.
+            </p>
+            <p className="text-xs text-[#565e74]/60 tracking-widest uppercase">© 2026 MahaPoly.</p>
+          </div>
+        </div>
+      </footer>
+
+      <style jsx global>{`
+        @keyframes scroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+      `}</style>
     </div>
   );
 }

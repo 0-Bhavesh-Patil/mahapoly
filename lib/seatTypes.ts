@@ -129,13 +129,16 @@ export const GENDER_OPTIONS: { value: Gender; label: string }[] = [
 const SPECIAL_CODES = new Set(Object.keys(SPECIAL_LABELS));
 
 // Given the filter selections, resolve the exact seat-type code string(s) to match against.
+// `levels` accepts multiple seat levels at once (Home/Other/State), since DTE assigns the
+// level per-college-per-application — a general tool can't know a student's actual level for
+// every college, so callers should default to checking all three rather than guessing one.
 export function resolveSeatCodes(params: {
   category: string;
   candidature: Candidature;
   gender: Gender;
-  level: Level;
+  levels: Level[];
 }): string[] {
-  const { category, candidature, gender, level } = params;
+  const { category, candidature, gender, levels } = params;
   if (SPECIAL_CODES.has(category)) return [category];
-  return [`${candidature}${gender}${category}${level}`];
+  return levels.map((level) => `${candidature}${gender}${category}${level}`);
 }
