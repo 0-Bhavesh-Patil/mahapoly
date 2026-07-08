@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { ArrowRight, GraduationCap, LoaderCircle, Menu, Sparkles, X } from "lucide-react";
+import { useEffect } from "react";
+import { GraduationCap, LoaderCircle, Sparkles } from "lucide-react";
 import type { MatchBucket } from "../lib/data";
 
 export function CursorGlow() {
@@ -22,32 +22,30 @@ export function CursorGlow() {
 
 export function TopNav() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
   const links = [
-    { href: "/", label: "Home" },
-    { href: "/onboarding", label: "Find Colleges" },
-    { href: "/results", label: "Explore Cut-offs" },
-    { href: "/shortlist", label: "Shortlist" },
+    { href: "/", label: "Overview" },
+    { href: "/results", label: "Colleges" },
+    { href: "/onboarding", label: "Cut-offs" },
   ];
 
   const isActive = (href: string) =>
     pathname === href || (href === "/onboarding" && pathname.startsWith("/onboarding"));
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[#dfe6f2] bg-white/92 shadow-[0_10px_28px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-      <div className="mx-auto flex min-h-[72px] max-w-[1280px] items-center gap-5 px-4 py-3 sm:px-6">
-        <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2.5" onClick={() => setOpen(false)}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#004aad,#2170e4_50%,#14b8a6)] text-white shadow-[0_12px_26px_rgba(0,88,190,0.30)] ring-1 ring-white/50">
-            <GraduationCap className="h-4.5 w-4.5" />
+    <header className="sticky top-0 z-30 border-b border-[#edf0f5] bg-white/95 shadow-[0_8px_22px_rgba(15,23,42,0.04)] backdrop-blur-xl">
+      <div className="mx-auto grid min-h-[64px] max-w-[1280px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-2 sm:px-6">
+        <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2.5 justify-self-start">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-[#d9e5ff] bg-[#eef5ff] text-[#2f80ed]">
+            <GraduationCap className="h-4 w-4" />
           </div>
-          <span className="truncate bg-gradient-to-r from-[#0058be] to-[#0f766e] bg-clip-text text-[20px] font-bold tracking-tight text-transparent">
+          <span className="truncate text-[22px] font-bold tracking-tight text-[#101828]">
             MahaPoly
           </span>
         </Link>
 
         <nav
           aria-label="Primary navigation"
-          className="ml-auto hidden items-center gap-1 md:flex"
+          className="hide-scrollbar flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-[#dee3ec] bg-[#f1f2f5] p-1"
         >
           {links.map((l) => {
             const active = isActive(l.href);
@@ -56,10 +54,10 @@ export function TopNav() {
                 key={l.href}
                 href={l.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold transition-all sm:px-5 ${
                   active
-                    ? "bg-[#eff6ff] text-[#0058be] shadow-[inset_0_0_0_1px_rgba(0,88,190,0.10)]"
-                    : "text-[#424754] hover:bg-[#f8fafc] hover:text-[#191b23]"
+                    ? "bg-white text-[#101828] shadow-[0_1px_3px_rgba(15,23,42,0.10)]"
+                    : "text-[#4b5565] hover:bg-white/70 hover:text-[#101828]"
                 }`}
               >
                 {l.label}
@@ -68,88 +66,40 @@ export function TopNav() {
           })}
         </nav>
 
-        <Link
-          href="/onboarding"
-          className="hidden h-11 shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-[#0058be] to-[#14b8a6] px-5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(0,88,190,0.24)] transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(0,88,190,0.30)] lg:inline-flex"
-        >
-          Check My Chances <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-
-        <button
-          type="button"
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          onClick={() => setOpen((value) => !value)}
-          className="ml-auto inline-flex h-11 items-center gap-2 rounded-xl border border-[#dbe5f2] bg-white px-3.5 text-sm font-semibold text-[#191b23] shadow-sm transition-colors hover:bg-[#f8fafc] md:hidden"
-        >
-          {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          Menu
-        </button>
-      </div>
-
-      {open && (
-        <div id="mobile-nav" className="border-t border-[#e8eef7] bg-white px-4 py-3 shadow-[0_18px_30px_rgba(15,23,42,0.08)] md:hidden">
-          <nav aria-label="Mobile navigation" className="mx-auto grid max-w-[1280px] gap-2">
-            {links.map((l) => {
-              const active = isActive(l.href);
-              return (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  aria-current={active ? "page" : undefined}
-                  className={`rounded-xl px-4 py-3 text-sm font-semibold ${
-                    active ? "bg-[#eff6ff] text-[#0058be]" : "text-[#424754] hover:bg-[#f8fafc]"
-                  }`}
-                >
-                  {l.label}
-                </Link>
-              );
-            })}
-            <Link
-              href="/onboarding"
-              onClick={() => setOpen(false)}
-              className="mt-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0058be] to-[#14b8a6] px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(0,88,190,0.20)]"
-            >
-              Check My Chances <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </nav>
+        <div className="flex items-center gap-3 justify-self-end">
+          <Link href="/" className="hidden text-sm font-medium text-[#344054] hover:text-[#0058be] sm:inline-flex">
+            Sign In
+          </Link>
+          <Link
+            href="/onboarding"
+            className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#2f80ed] px-4 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(47,128,237,0.30)] transition-all hover:-translate-y-0.5 hover:bg-[#1f6fd5] sm:px-5"
+          >
+            Get Started
+          </Link>
         </div>
-      )}
+      </div>
     </header>
   );
 }
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-black/[0.05] bg-white/70 px-6 py-14 backdrop-blur">
-      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-7 text-center">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#004aad,#2170e4_50%,#14b8a6)] text-white shadow-[0_10px_22px_rgba(0,88,190,0.20)]">
-            <GraduationCap className="h-4.5 w-4.5" />
-          </div>
-          <span className="bg-gradient-to-r from-[#0058be] to-[#0f766e] bg-clip-text text-xl font-bold tracking-tight text-transparent">
+    <footer className="border-t border-[#eef1f6] bg-[#f7f8fd] px-6 py-14">
+      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-5 text-center">
+        <Link href="/" className="flex items-center gap-2 text-[#667085]">
+          <GraduationCap className="h-3.5 w-3.5" />
+          <span className="text-sm font-bold tracking-tight">
             MahaPoly
           </span>
         </Link>
-        <nav aria-label="Footer navigation" className="flex flex-wrap justify-center gap-x-5 gap-y-2">
-          <Link href="/onboarding" className="text-sm font-semibold text-[#424754] hover:text-[#0058be]">
-            Find Colleges
-          </Link>
-          <Link href="/results" className="text-sm font-semibold text-[#424754] hover:text-[#0058be]">
-            Explore Cut-offs
-          </Link>
-          <Link href="/shortlist" className="text-sm font-semibold text-[#424754] hover:text-[#0058be]">
-            Shortlist
-          </Link>
-        </nav>
-        <div className="max-w-xl space-y-2">
-          <p className="text-xs leading-relaxed text-[#565e74]/75">
-            Disclaimer: MahaPoly is an independent tool built on historical DTE Maharashtra CAP cutoff data. It is not
-            affiliated with DTE Maharashtra. Predictions do not guarantee admission; always verify against your official
-            CAP login.
+        <div className="max-w-2xl space-y-3">
+          <p className="text-[11px] leading-relaxed text-[#8a93a6]">
+            Disclaimer: MahaPoly is an independent predictive tool based on historical CAP data. It is not affiliated
+            with the DTE Maharashtra. Predictions do not guarantee admission.
           </p>
-          <p className="text-xs uppercase tracking-[0.18em] text-[#565e74]/60">(c) 2026 MahaPoly.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#a0a7b8]">
+            (c) 2026 Mahapoly. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
