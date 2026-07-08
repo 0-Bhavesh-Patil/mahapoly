@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { Bell, GraduationCap, Home, Search, Star } from "lucide-react";
+import { ArrowRight, Building2, GraduationCap, Home, LoaderCircle, Search, Sparkles, Star } from "lucide-react";
 import type { MatchBucket } from "../lib/data";
 
 export function CursorGlow() {
@@ -25,49 +25,53 @@ export function TopNav() {
   const links = [
     { href: "/", label: "Home", Icon: Home },
     { href: "/onboarding", label: "Search", Icon: Search },
+    { href: "/results", label: "Colleges", Icon: Building2 },
     { href: "/shortlist", label: "Shortlist", Icon: Star },
   ];
   return (
-    <header className="bg-white/78 backdrop-blur-xl border-b border-white/70 sticky top-0 z-30 shadow-[0_10px_30px_rgba(15,23,42,0.04)]">
-      <CursorGlow />
+    <header className="bg-white/76 backdrop-blur-2xl border-b border-white/70 sticky top-0 z-30 shadow-[0_14px_36px_rgba(15,23,42,0.06)]">
       <div className="max-w-[1280px] mx-auto px-4 h-[72px] flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0058be] via-[#2170e4] to-[#14b8a6] text-white flex items-center justify-center shadow-[0_10px_24px_rgba(0,88,190,0.28)]">
+          <div className="w-9 h-9 rounded-xl bg-[linear-gradient(135deg,#004aad,#2170e4_50%,#14b8a6)] text-white flex items-center justify-center shadow-[0_12px_26px_rgba(0,88,190,0.30)] ring-1 ring-white/40">
             <GraduationCap className="h-4.5 w-4.5" />
           </div>
           <span className="font-bold text-[20px] bg-gradient-to-r from-[#0058be] to-[#0f766e] bg-clip-text text-transparent tracking-tight">
             MahaPoly
           </span>
         </Link>
-        <nav className="hidden md:flex items-center gap-1 bg-[#f1f5f9]/80 border border-white rounded-full p-1 shadow-inner">
+        <nav className="hidden md:flex items-center gap-1 bg-[#eef5ff]/82 border border-white rounded-full p-1 shadow-[inset_0_1px_2px_rgba(15,23,42,0.05),0_10px_24px_rgba(15,23,42,0.04)]">
           {links.map((l) => {
-            const active = pathname === l.href;
+            const active = pathname === l.href || (l.href === "/onboarding" && pathname.startsWith("/onboarding"));
             return (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  active ? "bg-white text-[#0058be] shadow-sm" : "text-[#424754] hover:bg-white/70 hover:text-[#191b23]"
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  active ? "bg-white text-[#0058be] shadow-[0_8px_18px_rgba(15,23,42,0.08)]" : "text-[#424754] hover:bg-white/70 hover:text-[#191b23]"
                 }`}
               >
+                <l.Icon className="h-3.5 w-3.5" />
                 {l.label}
               </Link>
             );
           })}
         </nav>
-        <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/[0.03] transition-colors text-[#424754]">
-          <Bell className="h-4 w-4" />
-        </button>
+        <Link
+          href="/onboarding"
+          className="hidden sm:inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0058be] to-[#14b8a6] px-4 py-2 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(0,88,190,0.24)] transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(0,88,190,0.30)]"
+        >
+          Start <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
       <nav className="md:hidden px-3 pb-3">
-        <div className="grid grid-cols-3 gap-2 rounded-2xl border border-[#e2e8f0] bg-white/85 p-1.5 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+        <div className="grid grid-cols-4 gap-1.5 rounded-2xl border border-[#e2e8f0] bg-white/88 p-1.5 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
           {links.map(({ href, label, Icon }) => {
             const active = pathname === href;
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-semibold transition-all ${
                   active ? "bg-[#0058be] text-white shadow-[0_10px_20px_rgba(0,88,190,0.22)]" : "text-[#424754] hover:bg-[#f1f5f9]"
                 }`}
               >
@@ -79,6 +83,27 @@ export function TopNav() {
         </div>
       </nav>
     </header>
+  );
+}
+
+export function Loading3D() {
+  return (
+    <div className="min-h-screen aurora-bg grid place-items-center px-6">
+      <div className="relative flex flex-col items-center">
+        <div className="loading-orbit" aria-hidden="true">
+          <div className="loading-cube">
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+        <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/72 px-4 py-2 text-sm font-semibold text-[#0058be] shadow-[0_14px_36px_rgba(15,23,42,0.08)] backdrop-blur">
+          <LoaderCircle className="h-4 w-4 animate-spin" />
+          Preparing MahaPoly
+          <Sparkles className="h-4 w-4 text-[#14b8a6]" />
+        </div>
+      </div>
+    </div>
   );
 }
 

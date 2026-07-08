@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, GraduationCap, ListChecks, Target } from "lucide-react";
 import { DATA, FLAT } from "../lib/data";
-import { CursorGlow } from "../components/ui";
+import { TopNav } from "../components/ui";
 
 const TICKER_ITEMS = [
   "418+ colleges mapped",
@@ -19,43 +19,10 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen aurora-bg text-[#191b23]">
-      <CursorGlow />
-      {/* Header */}
-      <header className="backdrop-blur-xl bg-white/78 border-b border-white/70 sticky top-0 z-30 shadow-[0_10px_30px_rgba(15,23,42,0.04)]">
-        <div className="max-w-[1280px] mx-auto px-4 h-[72px] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0058be] via-[#2170e4] to-[#14b8a6] text-white flex items-center justify-center shadow-[0_10px_24px_rgba(0,88,190,0.28)]">
-              <GraduationCap className="h-4.5 w-4.5" />
-            </div>
-            <span className="font-bold text-[22px] tracking-tight bg-gradient-to-r from-[#0058be] to-[#0f766e] bg-clip-text text-transparent">MahaPoly</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-1 bg-black/[0.04] border border-black/[0.05] rounded-full p-1">
-            <Link href="/" className="px-5 py-1.5 rounded-full text-sm font-medium bg-white shadow-sm">
-              Overview
-            </Link>
-            <Link href="/results" className="px-5 py-1.5 rounded-full text-sm font-medium text-[#565e74] hover:text-[#191b23]">
-              Colleges
-            </Link>
-            <Link href="/onboarding" className="px-5 py-1.5 rounded-full text-sm font-medium text-[#565e74] hover:text-[#191b23]">
-              Cut-offs
-            </Link>
-          </nav>
-          <div className="flex items-center gap-5">
-            <Link href="/onboarding" className="text-sm font-medium text-[#565e74] hover:text-[#191b23] hidden sm:block">
-              Skip to search
-            </Link>
-            <Link
-              href="/onboarding"
-              className="px-5 py-2 rounded-full text-sm font-medium text-white bg-gradient-to-r from-[#0058be] to-[#14b8a6] shadow-[0_12px_28px_rgba(0,88,190,0.26)] hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(0,88,190,0.32)] transition-all"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </header>
+      <TopNav />
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-12 md:pt-16 pb-20 md:pb-24 px-4 sm:px-6">
+      <section className="relative landing-grid overflow-hidden pt-12 md:pt-16 pb-20 md:pb-24 px-4 sm:px-6">
         <div
           className="pointer-events-none absolute -top-64 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full blur-[80px] opacity-60"
           style={{ background: "radial-gradient(circle, rgba(59,130,246,0.15), transparent 60%)" }}
@@ -153,7 +120,7 @@ export default function LandingPage() {
         <div className="flex gap-16 whitespace-nowrap animate-[scroll_30s_linear_infinite]">
           {[...TICKER_ITEMS, ...TICKER_ITEMS].map((t, i) => (
             <span key={i} className="flex items-center gap-2 text-sm font-medium text-[#565e74]">
-              <span className="text-[#10b981]">●</span> {t}
+              <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#10b981] to-[#3b82f6]" /> {t}
             </span>
           ))}
         </div>
@@ -168,8 +135,8 @@ export default function LandingPage() {
             { value: `${Math.round(recordCount / 1000)}k+`, label: "Records" },
             { value: "2026", label: "Data Year" },
           ].map((s, i) => (
-            <div key={i} className={`rounded-2xl bg-white/55 p-5 shadow-sm border border-white/70 ${i > 0 ? "md:border-l md:pl-8" : ""}`}>
-              <div className="text-4xl md:text-5xl font-light tracking-tight">{s.value}</div>
+            <div key={i} className="rounded-2xl bg-white/62 p-5 shadow-[0_18px_40px_rgba(15,23,42,0.06)] border border-white/80 lift-card">
+              <div className="text-4xl md:text-5xl font-light tracking-tight bg-gradient-to-r from-[#0058be] to-[#0f766e] bg-clip-text text-transparent">{s.value}</div>
               <div className="mt-3 text-xs font-medium text-[#565e74] tracking-[0.2em] uppercase">{s.label}</div>
             </div>
           ))}
@@ -241,10 +208,10 @@ export default function LandingPage() {
           <div className="text-center max-w-xl space-y-2">
             <p className="text-xs text-[#565e74]/70 leading-relaxed">
               Disclaimer: MahaPoly is an independent tool built on historical DTE Maharashtra CAP cutoff data. It is
-              not affiliated with DTE Maharashtra. Predictions do not guarantee admission — always verify against
+              not affiliated with DTE Maharashtra. Predictions do not guarantee admission; always verify against
               your official CAP login.
             </p>
-            <p className="text-xs text-[#565e74]/60 tracking-widest uppercase">© 2026 MahaPoly.</p>
+            <p className="text-xs text-[#565e74]/60 tracking-widest uppercase">(c) 2026 MahaPoly.</p>
           </div>
         </div>
       </footer>
