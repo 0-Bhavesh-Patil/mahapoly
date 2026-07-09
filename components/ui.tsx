@@ -118,13 +118,49 @@ export function TopNav() {
 }
 
 function MobileFloatingNav({ pathname, shortlistCount }: { pathname: string; shortlistCount: number }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  if (!isMobile) return null;
+
   return (
     <nav
       aria-label="Mobile navigation"
-      className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 md:hidden"
-      style={{ paddingBottom: "max(env(safe-area-inset-bottom), 1rem)" }}
+      style={{
+        position: "fixed",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 40,
+        display: "flex",
+        justifyContent: "center",
+        padding: "0 16px",
+        paddingBottom: "max(env(safe-area-inset-bottom), 16px)",
+        pointerEvents: "none",
+      }}
     >
-      <div className="flex items-center gap-1 rounded-full border border-white/60 bg-white/85 p-1.5 shadow-[0_18px_50px_rgba(0,88,190,0.22)] backdrop-blur-xl">
+      <div
+        style={{
+          pointerEvents: "auto",
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          borderRadius: 9999,
+          border: "1px solid rgba(255,255,255,0.6)",
+          background: "rgba(255,255,255,0.9)",
+          padding: 6,
+          boxShadow: "0 18px 50px rgba(0,88,190,0.28)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+        }}
+      >
         {NAV_LINKS.map(({ href, mobileLabel, icon: Icon }) => {
           const active = isActive(pathname, href);
           const badge = href === "/shortlist" ? shortlistCount : 0;
@@ -133,18 +169,47 @@ function MobileFloatingNav({ pathname, shortlistCount }: { pathname: string; sho
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
-              className={`relative flex flex-col items-center justify-center gap-0.5 rounded-full px-4 py-2 transition-all duration-200 ease-out ${
-                active
-                  ? "bg-gradient-to-b from-[#0068df] to-[#0058be] text-white shadow-[0_10px_22px_rgba(0,88,190,0.38)] -translate-y-0.5"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
+              style={{
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+                borderRadius: 9999,
+                padding: "8px 16px",
+                textDecoration: "none",
+                transition: "all 200ms ease-out",
+                transform: active ? "translateY(-2px)" : "none",
+                background: active ? "linear-gradient(to bottom, #0068df, #0058be)" : "transparent",
+                boxShadow: active ? "0 10px 22px rgba(0,88,190,0.38)" : "none",
+                color: active ? "#ffffff" : "#6b7280",
+              }}
             >
               <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
-              <span className={`text-[10px] font-medium leading-none ${active ? "text-white" : "text-gray-500"}`}>
+              <span style={{ fontSize: 10, fontWeight: 500, lineHeight: 1, color: active ? "#ffffff" : "#6b7280" }}>
                 {mobileLabel}
               </span>
               {badge > 0 && (
-                <span className="absolute -top-0.5 right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#14b8a6] px-1 text-[9px] font-bold text-white ring-2 ring-white">
+                <span
+                  style={{
+                    position: "absolute",
+                    top: -2,
+                    right: 4,
+                    display: "inline-flex",
+                    height: 16,
+                    minWidth: 16,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 9999,
+                    background: "#14b8a6",
+                    padding: "0 4px",
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: "#ffffff",
+                    boxShadow: "0 0 0 2px #ffffff",
+                  }}
+                >
                   {badge}
                 </span>
               )}
