@@ -155,3 +155,142 @@ function MobileFloatingNav({ pathname, shortlistCount }: { pathname: string; sho
     </nav>
   );
 }
+
+export function SiteFooter() {
+  return (
+    <footer className="flex flex-col items-center justify-center w-full bg-white py-8 px-6 border-t border-gray-200">
+      <div className="flex flex-col items-center w-full gap-3">
+        
+        {/* Brand Logo & Name */}
+        <Link href="/" className="flex items-center gap-2">
+          <GraduationCap className="h-5 w-5 text-gray-900" strokeWidth={2.5} />
+          <span className="text-gray-900 text-lg font-bold">
+            MahaPoly
+          </span>
+        </Link>
+
+        {/* Disclaimer */}
+        <p className="text-gray-800 text-[13px] sm:text-sm text-center">
+          Disclaimer: MahaPoly is an independent predictive tool based on historical CAP data. It is not affiliated with the DTEMaharashtra. Predictions do not guarantee admission.
+        </p>
+
+        {/* Copyright */}
+        <span className="text-gray-800 text-[13px] sm:text-sm font-medium">
+          © 2024 MAHAPOLY. ALL RIGHTS RESERVED.
+        </span>
+        
+      </div>
+    </footer>
+  );
+}
+
+export function Loading3D() {
+  return (
+    <div className="min-h-screen aurora-bg grid place-items-center px-6">
+      <div className="relative flex flex-col items-center">
+        <div className="loading-orbit" aria-hidden="true">
+          <div className="loading-cube">
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+        <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/72 px-4 py-2 text-sm font-semibold text-[#0058be] shadow-[0_14px_36px_rgba(15,23,42,0.08)] backdrop-blur">
+          <LoaderCircle className="h-4 w-4 animate-spin" />
+          Preparing MahaPoly
+          <Sparkles className="h-4 w-4 text-[#14b8a6]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function Pill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-5 py-2 rounded-full text-sm font-medium border transition-all ${
+        active ? "bg-[#0058be] border-[#0058be] text-white shadow-[0_8px_18px_rgba(0,88,190,0.20)]" : "border-[#e5e7eb] text-[#191b23] hover:border-[#c2c6d6] hover:bg-white"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function CheckPill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+        active ? "bg-[#0058be] border-[#0058be] text-white shadow-[0_8px_16px_rgba(0,88,190,0.18)]" : "bg-[#ecedf7] border-transparent text-[#424754] hover:border-[#c2c6d6] hover:bg-white"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+const BUCKET_META: Record<MatchBucket, { label: string; border: string; bg: string; text: string; softBg: string }> = {
+  safe: { label: "Safe Match", border: "#10b981", bg: "#d1fae5", text: "#059669", softBg: "#ecfdf5" },
+  competitive: { label: "Competitive", border: "#3b82f6", bg: "#dbeafe", text: "#2563eb", softBg: "#eff6ff" },
+  aspirational: { label: "Aspirational", border: "#f59e0b", bg: "#fef3c7", text: "#b45309", softBg: "#fffbeb" },
+};
+
+export function bucketMeta(bucket: MatchBucket) {
+  return BUCKET_META[bucket];
+}
+
+export function BucketBadge({ bucket }: { bucket: MatchBucket }) {
+  const m = bucketMeta(bucket);
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border"
+      style={{ backgroundColor: m.bg, color: m.text, borderColor: `${m.border}4D` }}
+    >
+      {m.label}
+    </span>
+  );
+}
+
+export function MarginBadge({ margin }: { margin: number }) {
+  const bucket: MatchBucket = margin > 2 ? "safe" : margin >= -2 ? "competitive" : "aspirational";
+  const m = bucketMeta(bucket);
+  const sign = margin >= 0 ? "+" : "";
+  return (
+    <span className="inline-flex px-2 py-0.5 rounded text-sm font-medium tabular-nums" style={{ backgroundColor: m.bg, color: m.text }}>
+      {sign}
+      {margin.toFixed(2)}%
+    </span>
+  );
+}
+
+export function CollegeTypeTag({ type }: { type: "government" | "aided" | "unaided" }) {
+  const styles: Record<string, string> = {
+    government: "bg-[#ecfdf5] border-[#d1fae5] text-[#047857]",
+    aided: "bg-[#eff6ff] border-[#dbeafe] text-[#1d4ed8]",
+    unaided: "bg-[#f1f5f9] border-[#e2e8f0] text-[#334155]",
+  };
+  const labels: Record<string, string> = { government: "Government", aided: "Govt. Aided", unaided: "Un-Aided" };
+  return (
+    <span className={`inline-flex px-2.5 py-1 rounded-md text-xs border ${styles[type]}`}>{labels[type]}</span>
+  );
+}
